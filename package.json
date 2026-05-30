@@ -1,0 +1,73 @@
+{
+  "name": "wrenfield-works",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Wrenfield Works Enterprise Site + CMS — bilingual (EN/TH) marketing site with embedded Payload CMS",
+  "license": "UNLICENSED",
+  "type": "module",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "packageManager": "pnpm@10.17.1",
+  "scripts": {
+    "dev": "next dev",
+    "devsafe": "rimraf .next && next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . && prettier --check . && tsc --noEmit",
+    "lint:fix": "eslint . --fix && prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "lhci": "lhci autorun",
+    "payload": "payload",
+    "seed": "cross-env PAYLOAD_SEED=true payload run src/seed/seed.ts",
+    "generate:types": "payload generate:types",
+    "generate:importmap": "payload generate:importmap"
+  },
+  "dependencies": {
+    "@payloadcms/db-postgres": "3.85.0",
+    "@payloadcms/next": "3.85.0",
+    "@payloadcms/richtext-lexical": "3.85.0",
+    "@payloadcms/ui": "3.85.0",
+    "graphql": "^16.11.0",
+    "next": "16.2.6",
+    "payload": "3.85.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "sharp": "^0.34.2"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "@playwright/test": "^1.49.1",
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.5",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^3.0.0",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.4.7",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "16.2.6",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@tailwindcss/oxide",
+      "esbuild",
+      "sharp",
+      "unrs-resolver",
+      "@swc/core"
+    ]
+  }
+}

@@ -31,14 +31,14 @@ Single Next.js + Payload app at repo root: `src/app`, `src/collections`, `src/gl
 
 **Purpose**: Project initialization and tooling.
 
-- [ ] T001 Initialize Next.js 16 + TypeScript (App Router, React 19) project at repo root per plan.md
-- [ ] T002 Add Payload CMS 3.x, `@payloadcms/db-postgres`, and core deps; create skeleton `src/payload.config.ts`
-- [ ] T003 [P] Configure ESLint + Prettier + TypeScript strict (`eslint.config.mjs`, `.prettierrc`, `tsconfig.json`)
-- [ ] T004 [P] Set up test harness: Vitest, Playwright, `@axe-core/playwright` (`vitest.config.ts`, `playwright.config.ts`, `tests/` dirs)
-- [ ] T005 [P] Add `docker-compose.yml` (local Postgres 16) and `.env.example` with all required vars (DATABASE_URI, PAYLOAD_SECRET, SMTP_*, TURNSTILE_*, ANALYTICS_*, S3_*)
-- [ ] T006 [P] Port design tokens from `enterprise.css` into `src/styles/tokens.css` (both dark and paper palettes) and Tailwind theme config
-- [ ] T007 [P] Load web fonts (Fraunces, Hanken Grotesk, JetBrains Mono, Trirong/Anuphan/IBM Plex Sans Thai) with `font-display: swap` in `src/lib/fonts.ts`
-- [ ] T008 Set up CI pipeline (lint, type-check, unit/integration/e2e, Lighthouse CI, dependency scan, coverage) in `.github/workflows/ci.yml`
+- [X] T001 Initialize Next.js 16 + TypeScript (App Router, React 19) project at repo root per plan.md
+- [X] T002 Add Payload CMS 3.x, `@payloadcms/db-postgres`, and core deps; create skeleton `src/payload.config.ts`
+- [X] T003 [P] Configure ESLint + Prettier + TypeScript strict (`eslint.config.mjs`, `.prettierrc`, `tsconfig.json`)
+- [X] T004 [P] Set up test harness: Vitest, Playwright, `@axe-core/playwright` (`vitest.config.ts`, `playwright.config.ts`, `tests/` dirs)
+- [X] T005 [P] Add `docker-compose.yml` (local Postgres 16) and `.env.example` with all required vars (DATABASE_URI, PAYLOAD_SECRET, SMTP_*, TURNSTILE_*, ANALYTICS_*, S3_*)
+- [X] T006 [P] Port design tokens from `enterprise.css` into `src/styles/tokens.css` (both dark and paper palettes) and Tailwind theme config
+- [X] T007 [P] Load web fonts (Fraunces, Hanken Grotesk, JetBrains Mono, Trirong/Anuphan/IBM Plex Sans Thai) with `font-display: swap` in `src/lib/fonts.ts`
+- [X] T008 Set up CI pipeline (lint, type-check, unit/integration/e2e, Lighthouse CI, dependency scan, coverage) in `.github/workflows/ci.yml`
 
 ---
 

@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  push:
+    branches: [main, '001-enterprise-site-cms']
+  pull_request:
+    branches: [main]
+
+# Constitution gates (v1.0.1): Security, Test-First, i18n, UX, Stability/Perf, UI, Code Quality.
+env:
+  PAYLOAD_SECRET: ci-secret-ci-secret-ci-secret-0123456789
+  DATABASE_URI: postgres://wrenfield:wrenfield@localhost:5432/wrenfield
+  NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+
+jobs:
+  quality:
+    name: Lint, format & types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.5'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate:types
+      - run: pnpm lint
+
+  test:
+    name: Unit & integration (Vitest) + coverage ≥ 80%
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wrenfield
+          POSTGRES_PASSWORD: wrenfield
+          POSTGRES_DB: wrenfield
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U wrenfield -d wrenfield"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.5'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate:types
+      - run: pnpm test -- --coverage
+
+  e2e:
+    name: E2E + WCAG 2.1 AA (Playwright + axe)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wrenfield
+          POSTGRES_PASSWORD: wrenfield
+          POSTGRES_DB: wrenfield
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U wrenfield -d wrenfield"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.5'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate:types
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm seed
+      - run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  lighthouse:
+    name: Performance budgets (Lighthouse CI)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wrenfield
+          POSTGRES_PASSWORD: wrenfield
+          POSTGRES_DB: wrenfield
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U wrenfield -d wrenfield"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.5'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm generate:types
+      - run: pnpm build
+      - run: pnpm seed
+      - run: pnpm dlx @lhci/cli@latest autorun
+
+  security:
+    name: Dependency scan & secret check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.19.5'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # No unresolved high/critical CVEs (Constitution Security gate).
+      - run: pnpm audit --audit-level high
+      # No secrets committed to source.
+      - name: Scan for committed secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

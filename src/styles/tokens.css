@@ -1,0 +1,113 @@
+/* ============================================================
+   WRENFIELD WORKS — design tokens (T006)
+   Ported verbatim from the approved design's enterprise.css.
+   Single source of truth for color, type, spacing, radius, motion.
+   Two themes ship: DARK (default, :root) + PAPER (body.paper) — FR-005b.
+   Both must meet WCAG 2.1 AA contrast (FR-007). Where the prototype
+   hard-coded brass/mint literals, they are tokenized here so the paper
+   theme can adjust them for AA in light mode.
+   ============================================================ */
+:root {
+  /* raw palette */
+  --ink: #15181d;
+  --ink-2: #1e242c;
+  --ink-3: #252c35;
+  --paper: #ece5d8;
+  --paper-2: #f5f0e6;
+  --brass: #b5894a;
+  --brass-lt: #cba265;
+  --slate: #6e747c;
+
+  /* font stacks — Latin family first, Thai family as fallback (from next/font, src/lib/fonts.ts) */
+  --serif: var(--font-serif), var(--font-serif-th), 'Fraunces', 'Trirong', Georgia, serif;
+  --sans: var(--font-sans), var(--font-sans-th), 'Hanken Grotesk', 'Anuphan', system-ui, sans-serif;
+  --mono: var(--font-mono), var(--font-mono-th), 'JetBrains Mono', 'IBM Plex Sans Thai', ui-monospace,
+    monospace;
+
+  /* radius */
+  --r-sm: 8px;
+  --r-md: 13px;
+  --r-lg: 15px;
+  --r-xl: 16px;
+  --r-pill: 999px;
+
+  /* spacing scale */
+  --s-1: 6px;
+  --s-2: 10px;
+  --s-3: 14px;
+  --s-4: 18px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 46px;
+  --s-8: 64px;
+  --s-section: 104px;
+
+  /* layout */
+  --maxw: 1180px;
+  --maxw-tight: 1080px;
+  --pad: 48px;
+
+  /* motion */
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 0.4s;
+
+  /* semantic — DARK (default) */
+  --bg: var(--ink);
+  --bg-2: var(--ink-2);
+  --bg-3: var(--ink-3);
+  --fg1: var(--paper);
+  --fg2: rgba(236, 229, 216, 0.82);
+  --fg3: var(--slate);
+  --accent: var(--brass-lt);
+  --accent-deep: var(--brass);
+  --line: rgba(236, 229, 216, 0.14);
+  --line-strong: rgba(236, 229, 216, 0.22);
+  --nav-bg: rgba(21, 24, 29, 0.72);
+  --nav-bg-scrolled: rgba(21, 24, 29, 0.9);
+  --card-grad: linear-gradient(180deg, rgba(255, 255, 255, 0.014), transparent);
+
+  /* tokenized literals (were hard-coded in the prototype) */
+  --positive: #86b88a; /* status pills / trust dot */
+  --on-accent: var(--ink); /* readable text on a brass fill */
+  --lattice: var(--brass); /* lattice canvas node/line color */
+  --cursor: var(--brass-lt);
+  --cursor-ring: rgba(203, 162, 101, 0.6);
+  --glow: rgba(181, 137, 74, 0.1);
+
+  /* tweak-driven decorative opacities */
+  --tx-grain: 0.04;
+  --tx-lattice: 1;
+}
+
+/* PAPER theme override (FR-005b). Accents darken for AA contrast on light bg. */
+body.paper {
+  --bg: var(--paper);
+  --bg-2: var(--paper-2);
+  --bg-3: #fbf7ee;
+  --fg1: var(--ink);
+  --fg2: rgba(21, 24, 29, 0.78);
+  --fg3: #6a6256; /* darkened from #7C7568 to clear AA on paper */
+  --accent: var(--brass);
+  --accent-deep: #8a6a30; /* darker brass for AA large-text/icon contrast */
+  --line: rgba(21, 24, 29, 0.14);
+  --line-strong: rgba(21, 24, 29, 0.2);
+  --nav-bg: rgba(236, 229, 216, 0.74);
+  --nav-bg-scrolled: rgba(236, 229, 216, 0.92);
+  --card-grad: linear-gradient(180deg, rgba(21, 24, 29, 0.018), transparent);
+
+  /* tokenized literals adjusted for light mode AA */
+  --positive: #2f7a45;
+  --on-accent: var(--paper);
+  --lattice: #9a7338;
+  --cursor: var(--brass);
+  --cursor-ring: rgba(154, 115, 56, 0.6);
+  --glow: rgba(154, 115, 56, 0.08);
+}
+
+/* Honor the OS reduced-motion preference globally (FR-006). `body.motion-off`
+   is also toggled by the theme/motion provider for an explicit visitor control. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0s;
+  }
+}

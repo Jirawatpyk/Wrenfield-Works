@@ -93,10 +93,10 @@ one Postgres database — no separate CMS service.
 
 ## Local automation already configured
 
-- **Hooks** (`.claude/settings.json` → `.claude/hooks/`): a `PreToolUse` guard **blocks edits to
-  secret files** (`.env`, `.env.*`, `*.pem`, `*.key`, `id_rsa`, `*credentials*`); a `PostToolUse`
-  hook runs Prettier + ESLint `--fix` on changed files **once the toolchain is installed** (no-ops
-  before scaffolding). Type-checking is left to CI, not per-edit, for speed.
+- **Hooks** (`.claude/settings.json` → `.claude/hooks/`): a `PostToolUse` hook runs Prettier +
+  ESLint `--fix` on changed files once the toolchain is installed. Type-checking is left to CI, not
+  per-edit, for speed. (Keep secrets out of the repo via `.gitignore`; `.env*` must never be
+  committed.)
 - **Review agents** (`.claude/agents/`): `i18n-a11y-reviewer` and `pdpa-compliance-reviewer` — use
   them when reviewing UI/i18n or inquiry/privacy code.
 

@@ -3,6 +3,8 @@ import { fileURLToPath } from 'url'
 
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { en } from '@payloadcms/translations/languages/en'
+import { th } from '@payloadcms/translations/languages/th'
 import { buildConfig } from 'payload'
 import type { CollectionConfig, GlobalConfig } from 'payload'
 import sharp from 'sharp'
@@ -117,6 +119,14 @@ export default buildConfig({
     ],
     defaultLocale: 'en',
     fallback: true,
+  },
+
+  // Bilingual back office: Payload chrome in EN + TH; editors pick their admin
+  // language in account settings. EN is the fallback. (Content EN/TH is the
+  // separate `localization` config above.)
+  i18n: {
+    supportedLanguages: { en, th },
+    fallbackLanguage: 'en',
   },
 
   editor: lexicalEditor(),

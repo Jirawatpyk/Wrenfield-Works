@@ -125,8 +125,8 @@ collection item; publish with TH missing is blocked; concurrent stale save is wa
 - [X] T048 [P] [US2] Integration: optimistic-concurrency conflict on stale save in `tests/integration/us2-conflict.spec.ts`
 - [X] T049 [P] [US2] Integration: stat numeric validation rejects non-number; URL validation in `tests/integration/us2-validation.spec.ts` (+ `tests/integration/us2-preview-route.spec.ts` for the FR-017 preview-route security gates)
 - [X] T050 [P] [US2] E2E: edit hero EN+TH → publish → visible; draft/preview hidden from public in `tests/e2e/us2-edit-publish.spec.ts`
-- [ ] T051 [P] [US2] E2E: add/remove (with confirmation)/reorder a collection item in `tests/e2e/us2-collections.spec.ts` — _authored; needs Payload 3.85 admin DOM selector tuning (delete is behind an unnamed doc-controls kebab → confirm modal). Capability is built-in + `orderField` (T059)._
-- [ ] T052 [P] [US2] E2E a11y: back-office editing UI meets WCAG 2.1 AA (keyboard + axe) in `tests/e2e/us2-admin-a11y.spec.ts` — _authored; runs axe against Payload's own admin UI; needs a live assessment + (per review) an error-toast `role="alert"` axe scenario._
+- [X] T051 [P] [US2] E2E: add/remove (with confirmation)/reorder a collection item in `tests/e2e/us2-collections.spec.ts` (delete via the doc-actions popup → `.confirmation-modal.delete-document`; passes against a production build)
+- [X] T052 [P] [US2] E2E a11y: back-office editing UI meets WCAG 2.1 AA (keyboard + axe) in `tests/e2e/us2-admin-a11y.spec.ts` — axe gates against NEW violations beyond a documented Payload-3.85 upstream baseline (button-name/color-contrast/list/label, tracked as upstream tech-debt); keyboard reachability (incl. Lexical contenteditable) verified
 
 ### Implementation for User Story 2
 
@@ -139,7 +139,7 @@ collection item; publish with TH missing is blocked; concurrent stale save is wa
 - [X] T059 [US2] Collection management UX: explicit ordering control + delete confirmation (FR-015) — `orderField` + Payload's built-in delete-confirm modal (e2e proof T051 pending)
 - [X] T060 [US2] SEO metadata editing in CMS (EN/TH + OG image upload) (FR-015a) — `SEOMetadata` global (localized title/description + `ogImage` → Media)
 - [X] T061 [US2] Audit trail (who/when) on published changes via Payload versions (FR-020) — `versions:{drafts:true}` on all content collections/globals
-- [X] T062 [US2] On-publish revalidation so published content appears immediately (FR-016) in `src/lib/revalidate.ts` (afterChange/afterDelete → `revalidatePath('/en','/th')`, failure-logged)
+- [X] T062 [US2] On-publish visibility so published content appears immediately (FR-016): the public `/[locale]` page renders dynamically (`force-dynamic`, in-process Payload reads) so a publish is visible at once; `src/lib/revalidate.ts` afterChange/afterDelete hooks (`revalidatePath('/[locale]','layout')`, failure-logged) remain as defense-in-depth for a future CDN/ISR layer
 - [X] T063 [US2] CSRF + injection + XSS output-encoding protections on back-office operations (FR-021) — Payload CSRF allow-list + Drizzle parameterized queries + React output-encoding + safe preview redirect (no open-redirect, HMAC token)
 
 **Checkpoint**: Non-technical staff can fully manage the site; US1 + US2 work independently.

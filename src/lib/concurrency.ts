@@ -13,6 +13,14 @@ import { APIError } from 'payload'
  * A save that omits `updatedAt` (a brand-new create, the edit that legitimately
  * advances the timestamp, or any non-conflicting flow such as the seed) is never
  * blocked — so this is backward-compatible with existing writes.
+ *
+ * KNOWN LIMITATION (tracked follow-up): `updatedAt` is auto-managed by Payload, and a drafts-enabled
+ * document's draft vs published versions diverge — so in the admin this comparison can occasionally
+ * false-positive on rapid publish/save sequences. It is a CONSERVATIVE failure (nothing is
+ * overwritten; the editor reloads). Concurrent admin editing is also guarded by Payload's built-in
+ * document locking; migrating FR-020a fully onto that lock (and dropping this hook) is the planned
+ * follow-up. This hook reliably guards direct-API updates that send a stale `updatedAt`
+ * (covered by tests/integration/us2-conflict.spec.ts).
  */
 /** Normalize an ISO string or Date to epoch ms (NaN if unparseable). */
 function toMs(value: unknown): number {

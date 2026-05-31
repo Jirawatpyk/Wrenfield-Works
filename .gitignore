@@ -56,3 +56,6 @@ Thumbs.db
 .build.log
 .pnpm-install*.log
 .claude/scheduled_tasks.lock
+
+# Playwright MCP inspection snapshots (transient)
+.playwright-mcp/

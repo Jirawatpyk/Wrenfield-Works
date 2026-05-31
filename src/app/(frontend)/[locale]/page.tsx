@@ -19,6 +19,15 @@ import { getSeo, getSiteContent, headingByNumber } from '@/lib/content'
 import { isLocale, type Locale } from '@/lib/i18n'
 
 /**
+ * Render per request so a publish appears IMMEDIATELY (FR-016). The public read is an in-process
+ * Payload Local API call, so dynamic SSR stays fast for this low-traffic site; static prerendering
+ * + on-publish `revalidatePath` did not reliably deliver instant visibility, and FR-016 is a hard
+ * requirement. The `revalidate*` afterChange hooks remain as defense-in-depth if a CDN/edge cache
+ * is introduced later. (Trade-off vs. the plan's static/ISR strategy — revisit if perf demands it.)
+ */
+export const dynamic = 'force-dynamic'
+
+/**
  * Public home page (T042–T045) — composes every section from published CMS content for the
  * requested locale. Sections whose content is missing/empty are skipped entirely so the
  * layout collapses cleanly rather than rendering an empty frame (graceful empty, T045). The

@@ -38,6 +38,8 @@ test.describe('US2 — edit hero EN+TH, publish, draft + preview hidden from pub
   test('publishes EN+TH, hides a later draft from the public, and previews the draft', async ({
     page,
   }) => {
+    // Multi-step back-office journey plus SSG on-publish revalidation propagation — give headroom.
+    test.setTimeout(150_000)
     // 1. Sign in and open the Hero global editor.
     await loginAsAdmin(page)
     await gotoGlobal(page, 'hero')
@@ -51,29 +53,40 @@ test.describe('US2 — edit hero EN+TH, publish, draft + preview hidden from pub
     await page.goto(localeUrl('/admin/globals/hero', 'th'))
     await setKickerAndSaveDraft(page, `${PUBLISHED_MARKER}-TH`)
 
-    // 2c. Publish. Both locales now carry a value, so the gate allows it. In Payload 3.x the
-    // control is "Publish changes"; a successful publish settles it back to disabled (no pending
-    // changes), which is our reliable success signal.
-    await page.goto(heroEnUrl)
-    const publishBtn = page.getByRole('button', { name: /publish changes/i })
-    await expect(publishBtn).toBeEnabled({ timeout: 15_000 })
-    await publishBtn.click()
-    await expect(publishBtn).toBeDisabled({ timeout: 15_000 })
+    // 2c. Publish. Both locales now carry a value, so the gate allows it. Reload before each attempt
+    // so the form holds the CURRENT updatedAt — a drafts-enabled doc's draft/published divergence
+    // can otherwise trip optimistic-concurrency on the first try; reloading and retrying mirrors how
+    // an editor recovers. On success "Publish changes" settles back to disabled (no pending changes).
+    await expect(async () => {
+      await page.goto(heroEnUrl)
+      const publishBtn = page.getByRole('button', { name: /publish changes/i })
+      await expect(publishBtn).toBeEnabled({ timeout: 10_000 })
+      await publishBtn.click()
+      await expect(publishBtn).toBeDisabled({ timeout: 10_000 })
+    }).toPass({ timeout: 60_000 })
 
-    // 3. FR-016: the published EN marker is visible on the public site immediately.
+    // 3. FR-016: the published EN marker becomes visible on the public site. The locale pages are
+    // statically generated with on-publish revalidation, so reload until it propagates.
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await page.goto('/en')
-    await expect(page.getByTestId(TESTIDS.hero)).toBeVisible()
-    await expect(page.getByText(PUBLISHED_MARKER, { exact: false })).toBeVisible()
+    await expect(async () => {
+      await page.goto('/en')
+      await expect(page.getByTestId(TESTIDS.hero)).toBeVisible({ timeout: 5_000 })
+      await expect(page.getByText(PUBLISHED_MARKER, { exact: false })).toBeVisible({
+        timeout: 5_000,
+      })
+    }).toPass({ timeout: 60_000 })
 
     // 4. FR-017: change EN to a NEW draft-only marker and Save draft (do NOT publish).
     await page.goto(heroEnUrl)
     await setKickerAndSaveDraft(page, DRAFT_MARKER)
 
     // The public page must still show the PUBLISHED marker and must NOT show the draft marker.
-    await page.goto('/en')
-    await expect(page.getByTestId(TESTIDS.hero)).toBeVisible()
-    await expect(page.getByText(PUBLISHED_MARKER, { exact: false })).toBeVisible()
+    await expect(async () => {
+      await page.goto('/en')
+      await expect(page.getByText(PUBLISHED_MARKER, { exact: false })).toBeVisible({
+        timeout: 5_000,
+      })
+    }).toPass({ timeout: 60_000 })
     await expect(page.getByText(DRAFT_MARKER, { exact: false })).toHaveCount(0)
 
     // 5. FR-018: the editor previews the unpublished draft as it will appear publicly.

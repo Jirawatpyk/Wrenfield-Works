@@ -32,6 +32,10 @@ async function revalidateSite(context: { disableRevalidate?: boolean } | undefin
   if (context?.disableRevalidate) return
   try {
     const { revalidatePath } = await import('next/cache')
+    // The public site is the dynamic route `/[locale]`; revalidating literal paths does not match
+    // a dynamic segment's cache key — revalidate the route pattern (covers /en and /th), plus the
+    // literals as a belt-and-braces fallback.
+    revalidatePath('/[locale]', 'layout')
     revalidatePath('/en')
     revalidatePath('/th')
   } catch (err) {

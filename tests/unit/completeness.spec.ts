@@ -5,7 +5,11 @@ import { collectLocaleStatus } from '@/lib/admin/completeness'
 const fields: Field[] = [
   { name: 'kicker', type: 'text', localized: true, label: 'Kicker' },
   { name: 'unit', type: 'text' }, // non-localized → ignored
-  { name: 'rows', type: 'array', fields: [{ name: 'label', type: 'text', localized: true, label: 'Row label' }] },
+  {
+    name: 'rows',
+    type: 'array',
+    fields: [{ name: 'label', type: 'text', localized: true, label: 'Row label' }],
+  },
 ]
 
 describe('collectLocaleStatus', () => {

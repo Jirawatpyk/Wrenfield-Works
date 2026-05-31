@@ -52,7 +52,10 @@ describe('walkLocalizedLeaves', () => {
     const fields: Field[] = [
       { type: 'row', fields: [{ name: 'a', type: 'text', localized: true }] },
       { name: 'grp', type: 'group', fields: [{ name: 'b', type: 'text', localized: true }] },
-      { type: 'tabs', tabs: [{ name: 'tab1', fields: [{ name: 'c', type: 'text', localized: true }] }] },
+      {
+        type: 'tabs',
+        tabs: [{ name: 'tab1', fields: [{ name: 'c', type: 'text', localized: true }] }],
+      },
       {
         name: 'blk',
         type: 'blocks',

@@ -30,9 +30,9 @@ export function collectLocaleStatus(fields: Field[], doc: AnyRecord): LocaleStat
 
   walkLocalizedLeaves(fields, doc, '', (path, value, label) => {
     anyLeaf = true
-    const map = (value && typeof value === 'object' && !Array.isArray(value)
-      ? (value as LocaleMap)
-      : {}) as LocaleMap
+    const map = (
+      value && typeof value === 'object' && !Array.isArray(value) ? (value as LocaleMap) : {}
+    ) as LocaleMap
     const enFilled = !isBlank(map.en)
     const thFilled = !isBlank(map.th)
     if (enFilled || thFilled) anyValue = true

@@ -103,6 +103,13 @@ export default buildConfig({
         Logo: '@/components/admin/BrandLogo#BrandLogo',
         Icon: '@/components/admin/BrandIcon#BrandIcon',
       },
+      // Dashboard editor guidance (T9): bilingual welcome card + EN/TH publish-
+      // readiness panel. Server components — Payload injects `payload` + `i18n`.
+      // Use the `@/*` alias (same rationale as `graphics` above).
+      beforeDashboard: [
+        '@/components/admin/WelcomeCard#default',
+        '@/components/admin/PublishReadiness#default',
+      ],
     },
     meta: {
       titleSuffix: ' — Wrenfield Works',

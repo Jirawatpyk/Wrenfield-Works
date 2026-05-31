@@ -1149,8 +1149,8 @@ In `src/payload.config.ts`, replace the `admin` block with (theme/providers/befo
     // The back-office editing UI must also meet WCAG 2.1 AA (FR-007).
     components: {
       graphics: {
-        Logo: '/components/admin/BrandLogo#BrandLogo',
-        Icon: '/components/admin/BrandIcon#BrandIcon',
+        Logo: '@/components/admin/BrandLogo#BrandLogo',
+        Icon: '@/components/admin/BrandIcon#BrandIcon',
       },
     },
     meta: {
@@ -1446,8 +1446,8 @@ In `src/payload.config.ts`, inside `admin.components` add:
 
 ```ts
       beforeDashboard: [
-        '/components/admin/WelcomeCard#default',
-        '/components/admin/PublishReadiness#default',
+        '@/components/admin/WelcomeCard#default',
+        '@/components/admin/PublishReadiness#default',
       ],
 ```
 
@@ -1639,7 +1639,7 @@ In `src/payload.config.ts`, add the status field at the front of every content t
 const localeStatusField = {
   name: 'localeStatus',
   type: 'ui' as const,
-  admin: { components: { Field: '/components/admin/LocaleStatusField#default' } },
+  admin: { components: { Field: '@/components/admin/LocaleStatusField#default' } },
 }
 ```
 
@@ -2016,13 +2016,13 @@ In `src/payload.config.ts`, add `theme: 'all'` to the `admin` object and registe
     theme: 'all',
     components: {
       graphics: {
-        Logo: '/components/admin/BrandLogo#BrandLogo',
-        Icon: '/components/admin/BrandIcon#BrandIcon',
+        Logo: '@/components/admin/BrandLogo#BrandLogo',
+        Icon: '@/components/admin/BrandIcon#BrandIcon',
       },
-      providers: ['/components/admin/DefaultDarkTheme#DefaultDarkTheme'],
+      providers: ['@/components/admin/DefaultDarkTheme#DefaultDarkTheme'],
       beforeDashboard: [
-        '/components/admin/WelcomeCard#default',
-        '/components/admin/PublishReadiness#default',
+        '@/components/admin/WelcomeCard#default',
+        '@/components/admin/PublishReadiness#default',
       ],
     },
     meta: {

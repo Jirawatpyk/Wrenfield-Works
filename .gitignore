@@ -48,3 +48,11 @@ Thumbs.db
 # turbo / caches
 /.turbo
 *.tsbuildinfo
+
+# transient task/verify artifacts
+*.exit
+.docker.log
+.gen-*.log
+.build.log
+.pnpm-install*.log
+.claude/scheduled_tasks.lock

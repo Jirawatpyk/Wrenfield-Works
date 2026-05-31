@@ -6,7 +6,22 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
 
+import { Capabilities } from './collections/Capabilities'
+import { CaseStudies } from './collections/CaseStudies'
+import { ClientLogos } from './collections/ClientLogos'
+import { Media } from './collections/Media'
+import { ProcessSteps } from './collections/ProcessSteps'
+import { ShowcaseSurfaces } from './collections/ShowcaseSurfaces'
+import { Stats } from './collections/Stats'
 import { Users } from './collections/Users'
+import { CallToAction } from './globals/CallToAction'
+import { Footer } from './globals/Footer'
+import { Hero } from './globals/Hero'
+import { Marquee } from './globals/Marquee'
+import { NavLabels } from './globals/NavLabels'
+import { SectionHeadings } from './globals/SectionHeadings'
+import { SEOMetadata } from './globals/SEOMetadata'
+import { Testimonial } from './globals/Testimonial'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -14,11 +29,10 @@ const dirname = path.dirname(filename)
 /**
  * Single source of truth for the embedded Payload CMS.
  *
- * Collections / globals are registered in later foundational tasks (T011–T015).
  * Localization is EN (default) + TH with fallback so the public read layer can
  * gracefully show the available language when one is unexpectedly missing
  * (content-api contract, spec Edge Cases). The publish-completeness gate (FR-014)
- * is wired per-collection via a shared hook in `src/lib/validation`.
+ * is wired per-collection/global via the shared `publishCompletenessHook`.
  */
 export default buildConfig({
   admin: {
@@ -38,11 +52,29 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  // Users is required for the admin panel to boot; Media + ordered content
-  // collections are added in Phase 2 (Foundational, T012–T013).
-  collections: [Users],
-  // Registered in Phase 2 (Foundational): Hero, NavLabels, Marquee, etc.
-  globals: [],
+  // Ordered, repeatable content + auth + media (data-model.md). Inquiries added in US3 (T070).
+  collections: [
+    Users,
+    Media,
+    Stats,
+    ClientLogos,
+    Capabilities,
+    CaseStudies,
+    ProcessSteps,
+    ShowcaseSurfaces,
+  ],
+
+  // Singletons (data-model.md).
+  globals: [
+    Hero,
+    NavLabels,
+    Marquee,
+    SectionHeadings,
+    Testimonial,
+    CallToAction,
+    Footer,
+    SEOMetadata,
+  ],
 
   secret: process.env.PAYLOAD_SECRET || '',
 

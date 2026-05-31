@@ -1,26 +1,29 @@
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import type { ReactNode } from 'react'
 
+import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { fontVariables } from '@/lib/fonts'
+import { LOCALES, isLocale } from '@/lib/i18n'
+import { themeBootScript } from '@/lib/theme'
 import '@/styles/globals.css'
 
 /**
  * Root layout for the public (frontend) route group. Because the app uses two
- * route groups — (frontend) and (payload) — without a shared root, this is the
- * topmost layout for the public branch and therefore renders <html>/<body>.
+ * route groups — (frontend) and (payload) — without a shared root layout, this
+ * is the topmost layout for the public branch and renders <html>/<body>.
  *
- * Theme (dark default + paper) and locale providers are wired in T018/T019;
- * this Phase-1 version establishes the document shell, fonts, and locale lang.
+ * The theme boot script runs before paint to apply the saved theme + OS
+ * reduced-motion class with no flash (FR-005b, FR-006). ThemeProvider keeps the
+ * toggle's state in sync. SEO/social metadata per locale is added in T043.
  */
 export const metadata: Metadata = {
   title: 'Wrenfield Works — Enterprise systems, built right.',
   description: 'AI-assisted systems, built right.',
 }
 
-const SUPPORTED_LOCALES = ['en', 'th'] as const
-
 export function generateStaticParams() {
-  return SUPPORTED_LOCALES.map((locale) => ({ locale }))
+  return LOCALES.map((locale) => ({ locale }))
 }
 
 export default async function FrontendLayout({
@@ -31,14 +34,15 @@ export default async function FrontendLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const lang = SUPPORTED_LOCALES.includes(locale as (typeof SUPPORTED_LOCALES)[number])
-    ? locale
-    : 'en'
+  if (!isLocale(locale)) notFound()
 
   return (
-    <html lang={lang} className={fontVariables}>
-      {/* dark theme is the default; the paper theme toggles `paper` on <body> (T018) */}
-      <body className={lang === 'th' ? 'lang-th' : undefined}>{children}</body>
+    <html lang={locale} className={fontVariables}>
+      <body className={locale === 'th' ? 'lang-th' : undefined}>
+        {/* Apply persisted theme + reduced-motion before first paint (no FOUC). */}
+        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   )
 }

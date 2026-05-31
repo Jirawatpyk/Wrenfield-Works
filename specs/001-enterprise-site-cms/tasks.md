@@ -48,18 +48,18 @@ Single Next.js + Payload app at repo root: `src/app`, `src/collections`, `src/gl
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T009 Configure Postgres adapter + connection in `src/payload.config.ts` (env `DATABASE_URI`)
-- [ ] T010 Enable Payload localization: locales `en` (default) + `th` in `src/payload.config.ts`
-- [ ] T011 [P] Define `Users` collection (auth, single staff role, deny-by-default access) in `src/collections/Users.ts`
-- [ ] T012 [P] Define `Media` collection (uploads, in-region storage adapter, localized `alt`) in `src/collections/Media.ts`
-- [ ] T013 [P] Define ordered content collections (drafts+versions, localized fields) — `Capabilities`, `CaseStudies`, `ProcessSteps`, `Stats`, `ClientLogos`, `ShowcaseSurfaces` in `src/collections/*.ts` (data-model.md)
-- [ ] T014 [P] Define globals (drafts+versions, localized) — `Hero`, `NavLabels`, `Marquee`, `SectionHeadings`, `Testimonial`, `CallToAction`, `Footer`, `SEOMetadata` in `src/globals/*.ts`
-- [ ] T015 Implement shared publish-completeness hook (block publish if any localized field missing EN or TH) in `src/lib/validation/publishCompleteness.ts` and wire into all collections/globals
-- [ ] T016 [P] Set up structured logging (Pino) in `src/lib/logging.ts`
-- [ ] T016a [P] Set up observability — metrics + tracing on critical paths (publish, inquiry submission, retention job) and a health endpoint — in `src/lib/observability.ts` (Constitution Principle V)
-- [ ] T017 Implement locale routing via Next.js 16 `src/proxy.ts` (default-locale redirect, `/en` `/th` segments) + persistence helper in `src/lib/i18n.ts`
-- [ ] T018 Implement theme system (dark default + paper) with persistent visitor toggle in `src/lib/theme.ts` + theme provider, wired to tokens (FR-005b)
-- [ ] T019 Create base locale layout + providers (theme, locale) + global styles in `src/app/(frontend)/[locale]/layout.tsx` and `src/styles/globals.css`
+- [X] T009 Configure Postgres adapter + connection in `src/payload.config.ts` (env `DATABASE_URI`)
+- [X] T010 Enable Payload localization: locales `en` (default) + `th` in `src/payload.config.ts`
+- [X] T011 [P] Define `Users` collection (auth, single staff role, deny-by-default access) in `src/collections/Users.ts`
+- [X] T012 [P] Define `Media` collection (uploads, in-region storage adapter, localized `alt`) in `src/collections/Media.ts`
+- [X] T013 [P] Define ordered content collections (drafts+versions, localized fields) — `Capabilities`, `CaseStudies`, `ProcessSteps`, `Stats`, `ClientLogos`, `ShowcaseSurfaces` in `src/collections/*.ts` (data-model.md)
+- [X] T014 [P] Define globals (drafts+versions, localized) — `Hero`, `NavLabels`, `Marquee`, `SectionHeadings`, `Testimonial`, `CallToAction`, `Footer`, `SEOMetadata` in `src/globals/*.ts`
+- [X] T015 Implement shared publish-completeness hook (block publish if any localized field missing EN or TH) in `src/lib/validation/publishCompleteness.ts` and wire into all collections/globals
+- [X] T016 [P] Set up structured logging (Pino) in `src/lib/logging.ts`
+- [X] T016a [P] Set up observability — metrics + tracing on critical paths (publish, inquiry submission, retention job) and a health endpoint — in `src/lib/observability.ts` (Constitution Principle V)
+- [X] T017 Implement locale routing via Next.js 16 `src/proxy.ts` (default-locale redirect, `/en` `/th` segments) + persistence helper in `src/lib/i18n.ts`
+- [X] T018 Implement theme system (dark default + paper) with persistent visitor toggle in `src/lib/theme.ts` + theme provider, wired to tokens (FR-005b)
+- [X] T019 Create base locale layout + providers (theme, locale) + global styles in `src/app/(frontend)/[locale]/layout.tsx` and `src/styles/globals.css`
 - [ ] T020 Create content seed script (EN/TH copy from the approved design) in `src/seed/seed.ts` (`pnpm seed`)
 
 **Checkpoint**: Schema, auth, localization, routing, theming ready — user stories can begin.

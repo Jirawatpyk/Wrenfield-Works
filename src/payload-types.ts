@@ -68,6 +68,13 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    media: Media;
+    stats: Stat;
+    'client-logos': ClientLogo;
+    capabilities: Capability;
+    'case-studies': CaseStudy;
+    'process-steps': ProcessStep;
+    'showcase-surfaces': ShowcaseSurface;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,6 +83,13 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
+    stats: StatsSelect<false> | StatsSelect<true>;
+    'client-logos': ClientLogosSelect<false> | ClientLogosSelect<true>;
+    capabilities: CapabilitiesSelect<false> | CapabilitiesSelect<true>;
+    'case-studies': CaseStudiesSelect<false> | CaseStudiesSelect<true>;
+    'process-steps': ProcessStepsSelect<false> | ProcessStepsSelect<true>;
+    'showcase-surfaces': ShowcaseSurfacesSelect<false> | ShowcaseSurfacesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -85,8 +99,26 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'th') | ('en' | 'th')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    hero: Hero;
+    'nav-labels': NavLabel;
+    marquee: Marquee;
+    'section-headings': SectionHeading;
+    testimonial: Testimonial;
+    'call-to-action': CallToAction;
+    footer: Footer;
+    'seo-metadata': SeoMetadatum;
+  };
+  globalsSelect: {
+    hero: HeroSelect<false> | HeroSelect<true>;
+    'nav-labels': NavLabelsSelect<false> | NavLabelsSelect<true>;
+    marquee: MarqueeSelect<false> | MarqueeSelect<true>;
+    'section-headings': SectionHeadingsSelect<false> | SectionHeadingsSelect<true>;
+    testimonial: TestimonialSelect<false> | TestimonialSelect<true>;
+    'call-to-action': CallToActionSelect<false> | CallToActionSelect<true>;
+    footer: FooterSelect<false> | FooterSelect<true>;
+    'seo-metadata': SeoMetadataSelect<false> | SeoMetadataSelect<true>;
+  };
   locale: 'en' | 'th';
   widgets: {
     collections: CollectionsWidget;
@@ -143,6 +175,239 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stats".
+ */
+export interface Stat {
+  id: number;
+  /**
+   * Display order on the public site (ascending). Shared across locales.
+   */
+  order: number;
+  /**
+   * Numeric value, e.g. 60, 40, 100. Validated as a number (FR-019).
+   */
+  value: number;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  unit: string;
+  label: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-logos".
+ */
+export interface ClientLogo {
+  id: number;
+  /**
+   * Display order on the public site (ascending). Shared across locales.
+   */
+  order: number;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "capabilities".
+ */
+export interface Capability {
+  id: number;
+  /**
+   * Display order on the public site (ascending). Shared across locales.
+   */
+  order: number;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  categoryLabel: string;
+  icon: 'automation' | 'tools' | 'systems' | 'leverage';
+  title: string;
+  description: string;
+  tags?:
+    | {
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies".
+ */
+export interface CaseStudy {
+  id: number;
+  /**
+   * Display order on the public site (ascending). Shared across locales.
+   */
+  order: number;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  tag: string;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  glyph: string;
+  title: string;
+  description: string;
+  metricsLine?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "process-steps".
+ */
+export interface ProcessStep {
+  id: number;
+  /**
+   * Display order on the public site (ascending). Shared across locales.
+   */
+  order: number;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  number: string;
+  name: string;
+  title: string;
+  description: string;
+  checklist?:
+    | {
+        point: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "showcase-surfaces".
+ */
+export interface ShowcaseSurface {
+  id: number;
+  /**
+   * Display order on the public site (ascending). Shared across locales.
+   */
+  order: number;
+  /**
+   * Intentionally English-only (brand/technical label).
+   */
+  tabName: string;
+  tabTitle: string;
+  tabDescription: string;
+  panel?:
+    | (
+        | {
+            name: string;
+            /**
+             * Intentionally English-only (brand/technical label).
+             */
+            sub?: string | null;
+            /**
+             * Intentionally English-only (brand/technical label).
+             */
+            pillLabel?: string | null;
+            pillKind?: ('ok' | 'run') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mockRow';
+          }
+        | {
+            items?:
+              | {
+                  /**
+                   * Intentionally English-only (brand/technical label).
+                   */
+                  value: string;
+                  label: string;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'kpiGrid';
+          }
+        | {
+            bars?:
+              | {
+                  height: number;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'chart';
+          }
+        | {
+            lines?:
+              | {
+                  /**
+                   * Intentionally English-only (brand/technical label).
+                   */
+                  text: string;
+                  kind?: ('comment' | 'keyword' | 'string' | 'plain') | null;
+                  id?: string | null;
+                }[]
+              | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'codeLines';
+          }
+      )[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -164,10 +429,39 @@ export interface PayloadKv {
  */
 export interface PayloadLockedDocument {
   id: number;
-  document?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'stats';
+        value: number | Stat;
+      } | null)
+    | ({
+        relationTo: 'client-logos';
+        value: number | ClientLogo;
+      } | null)
+    | ({
+        relationTo: 'capabilities';
+        value: number | Capability;
+      } | null)
+    | ({
+        relationTo: 'case-studies';
+        value: number | CaseStudy;
+      } | null)
+    | ({
+        relationTo: 'process-steps';
+        value: number | ProcessStep;
+      } | null)
+    | ({
+        relationTo: 'showcase-surfaces';
+        value: number | ShowcaseSurface;
+      } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -235,6 +529,168 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stats_select".
+ */
+export interface StatsSelect<T extends boolean = true> {
+  order?: T;
+  value?: T;
+  unit?: T;
+  label?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "client-logos_select".
+ */
+export interface ClientLogosSelect<T extends boolean = true> {
+  order?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "capabilities_select".
+ */
+export interface CapabilitiesSelect<T extends boolean = true> {
+  order?: T;
+  categoryLabel?: T;
+  icon?: T;
+  title?: T;
+  description?: T;
+  tags?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "case-studies_select".
+ */
+export interface CaseStudiesSelect<T extends boolean = true> {
+  order?: T;
+  tag?: T;
+  glyph?: T;
+  title?: T;
+  description?: T;
+  metricsLine?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "process-steps_select".
+ */
+export interface ProcessStepsSelect<T extends boolean = true> {
+  order?: T;
+  number?: T;
+  name?: T;
+  title?: T;
+  description?: T;
+  checklist?:
+    | T
+    | {
+        point?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "showcase-surfaces_select".
+ */
+export interface ShowcaseSurfacesSelect<T extends boolean = true> {
+  order?: T;
+  tabName?: T;
+  tabTitle?: T;
+  tabDescription?: T;
+  panel?:
+    | T
+    | {
+        mockRow?:
+          | T
+          | {
+              name?: T;
+              sub?: T;
+              pillLabel?: T;
+              pillKind?: T;
+              id?: T;
+              blockName?: T;
+            };
+        kpiGrid?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    value?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        chart?:
+          | T
+          | {
+              bars?:
+                | T
+                | {
+                    height?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        codeLines?:
+          | T
+          | {
+              lines?:
+                | T
+                | {
+                    text?: T;
+                    kind?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -272,6 +728,365 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero".
+ */
+export interface Hero {
+  id: number;
+  kicker: string;
+  headline: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  subhead: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  trustLabel: string;
+  primaryCtaLabel: string;
+  secondaryCtaLabel: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nav-labels".
+ */
+export interface NavLabel {
+  id: number;
+  capabilities: string;
+  platform: string;
+  work: string;
+  process: string;
+  ctaLabel: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "marquee".
+ */
+export interface Marquee {
+  id: number;
+  heading: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "section-headings".
+ */
+export interface SectionHeading {
+  id: number;
+  headings?:
+    | {
+        /**
+         * Intentionally English-only (brand/technical label).
+         */
+        number: string;
+        title: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        subtitle: string;
+        id?: string | null;
+      }[]
+    | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonial".
+ */
+export interface Testimonial {
+  id: number;
+  quote: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  attribution: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "call-to-action".
+ */
+export interface CallToAction {
+  id: number;
+  kicker: string;
+  heading: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  body: string;
+  email: string;
+  bookCallLabel: string;
+  socialLinks?:
+    | {
+        /**
+         * Intentionally English-only (brand/technical label).
+         */
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  blurb: string;
+  studioLinks?:
+    | {
+        label: string;
+        anchor: string;
+        id?: string | null;
+      }[]
+    | null;
+  connectLinks?:
+    | {
+        /**
+         * Intentionally English-only (brand/technical label).
+         */
+        label: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  bottomNote: string;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-metadata".
+ */
+export interface SeoMetadatum {
+  id: number;
+  title: string;
+  description: string;
+  ogImage?: (number | null) | Media;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hero_select".
+ */
+export interface HeroSelect<T extends boolean = true> {
+  kicker?: T;
+  headline?: T;
+  subhead?: T;
+  trustLabel?: T;
+  primaryCtaLabel?: T;
+  secondaryCtaLabel?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nav-labels_select".
+ */
+export interface NavLabelsSelect<T extends boolean = true> {
+  capabilities?: T;
+  platform?: T;
+  work?: T;
+  process?: T;
+  ctaLabel?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "marquee_select".
+ */
+export interface MarqueeSelect<T extends boolean = true> {
+  heading?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "section-headings_select".
+ */
+export interface SectionHeadingsSelect<T extends boolean = true> {
+  headings?:
+    | T
+    | {
+        number?: T;
+        title?: T;
+        subtitle?: T;
+        id?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "testimonial_select".
+ */
+export interface TestimonialSelect<T extends boolean = true> {
+  quote?: T;
+  attribution?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "call-to-action_select".
+ */
+export interface CallToActionSelect<T extends boolean = true> {
+  kicker?: T;
+  heading?: T;
+  body?: T;
+  email?: T;
+  bookCallLabel?: T;
+  socialLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  blurb?: T;
+  studioLinks?:
+    | T
+    | {
+        label?: T;
+        anchor?: T;
+        id?: T;
+      };
+  connectLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  bottomNote?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "seo-metadata_select".
+ */
+export interface SeoMetadataSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  ogImage?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

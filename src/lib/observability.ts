@@ -23,11 +23,7 @@ export function incr(metric: string, tags?: Tags, by = 1): void {
  * Time an async critical-path operation. Records duration, success/failure, and
  * re-throws so callers still handle errors (no silent failure — Constitution V).
  */
-export async function trace<T>(
-  span: string,
-  fn: () => Promise<T>,
-  tags?: Tags,
-): Promise<T> {
+export async function trace<T>(span: string, fn: () => Promise<T>, tags?: Tags): Promise<T> {
   const start = performance.now()
   try {
     const result = await fn()

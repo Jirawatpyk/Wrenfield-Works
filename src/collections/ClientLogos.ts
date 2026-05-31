@@ -22,8 +22,5 @@ export const ClientLogos: CollectionConfig = {
   hooks: {
     beforeValidate: [publishCompletenessHook],
   },
-  fields: [
-    orderField,
-    monoText({ name: 'name', label: 'Client name', required: true }),
-  ],
+  fields: [orderField, monoText({ name: 'name', label: 'Client name', required: true })],
 }

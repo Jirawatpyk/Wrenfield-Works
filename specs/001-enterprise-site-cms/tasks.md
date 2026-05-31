@@ -60,7 +60,7 @@ Single Next.js + Payload app at repo root: `src/app`, `src/collections`, `src/gl
 - [X] T017 Implement locale routing via Next.js 16 `src/proxy.ts` (default-locale redirect, `/en` `/th` segments) + persistence helper in `src/lib/i18n.ts`
 - [X] T018 Implement theme system (dark default + paper) with persistent visitor toggle in `src/lib/theme.ts` + theme provider, wired to tokens (FR-005b)
 - [X] T019 Create base locale layout + providers (theme, locale) + global styles in `src/app/(frontend)/[locale]/layout.tsx` and `src/styles/globals.css`
-- [ ] T020 Create content seed script (EN/TH copy from the approved design) in `src/seed/seed.ts` (`pnpm seed`)
+- [X] T020 Create content seed script (EN/TH copy from the approved design) in `src/seed/seed.ts` (`pnpm seed`)
 
 **Checkpoint**: Schema, auth, localization, routing, theming ready — user stories can begin.
 
@@ -76,35 +76,35 @@ persist), resize 360→1440, enable reduce-motion, run axe AA — all pass.
 
 ### Tests for User Story 1 (write first, must fail) ⚠️
 
-- [ ] T021 [P] [US1] E2E: all sections render in EN with seeded content in `tests/e2e/us1-sections.spec.ts`
-- [ ] T022 [P] [US1] E2E: language switch EN↔TH updates all prose and persists on return in `tests/e2e/us1-i18n.spec.ts`
-- [ ] T023 [P] [US1] E2E: theme toggle dark↔paper persists across reload in `tests/e2e/us1-theme.spec.ts`
-- [ ] T024 [P] [US1] E2E a11y: axe WCAG 2.1 AA on every section + states, both themes in `tests/e2e/us1-a11y.spec.ts`
-- [ ] T025 [P] [US1] E2E: reduce-motion disables decorative animation; marquee is pausable in `tests/e2e/us1-motion.spec.ts`
-- [ ] T026 [P] [US1] E2E: responsive 360–1440px no overflow/overlap/clipping (incl. +50% long text) in `tests/e2e/us1-responsive.spec.ts`
-- [ ] T027 [P] [US1] Unit: locale-scoped content mapping, single-locale fallback, empty-collection handling in `tests/unit/content.spec.ts`
-- [ ] T027a [P] [US1] E2E: the enumerated English-only labels stay untranslated across EN/TH while all prose toggles, and numeric/currency values render as authored per locale (FR-011, FR-011c) in `tests/e2e/us1-mono-labels.spec.ts`
+- [X] T021 [P] [US1] E2E: all sections render in EN with seeded content in `tests/e2e/us1-sections.spec.ts`
+- [X] T022 [P] [US1] E2E: language switch EN↔TH updates all prose and persists on return in `tests/e2e/us1-i18n.spec.ts`
+- [X] T023 [P] [US1] E2E: theme toggle dark↔paper persists across reload in `tests/e2e/us1-theme.spec.ts`
+- [X] T024 [P] [US1] E2E a11y: axe WCAG 2.1 AA on every section + states, both themes in `tests/e2e/us1-a11y.spec.ts`
+- [X] T025 [P] [US1] E2E: reduce-motion disables decorative animation; marquee is pausable in `tests/e2e/us1-motion.spec.ts`
+- [X] T026 [P] [US1] E2E: responsive 360–1440px no overflow/overlap/clipping (incl. +50% long text) in `tests/e2e/us1-responsive.spec.ts`
+- [X] T027 [P] [US1] Unit: locale-scoped content mapping, single-locale fallback, empty-collection handling in `tests/unit/content.spec.ts`
+- [X] T027a [P] [US1] E2E: the enumerated English-only labels stay untranslated across EN/TH while all prose toggles, and numeric/currency values render as authored per locale (FR-011, FR-011c) in `tests/e2e/us1-mono-labels.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T028 [US1] Content read layer (locale-scoped, published-only, ordered, fallback) via Payload Local API in `src/lib/content.ts` (content-api contract)
-- [ ] T029 [P] [US1] Primitive components Button, Pill, Reveal, Counter in `src/components/primitives/`
-- [ ] T030 [P] [US1] `LatticeCanvas` primitive (reduced-motion aware, `aria-hidden`) in `src/components/primitives/LatticeCanvas.tsx`
-- [ ] T031 [P] [US1] `CustomCursor` + magnetic buttons — disabled on touch/coarse-pointer and reduce-motion; never suppress focus (FR-007c) in `src/components/layout/CustomCursor.tsx`
-- [ ] T032 [P] [US1] Nav + `LangToggle` + `ThemeToggle` with accessible names/states (FR-007d) in `src/components/layout/`
-- [ ] T033 [P] [US1] Hero section (word-reveal, Thai typography per FR-004) in `src/components/sections/Hero.tsx`
-- [ ] T034 [P] [US1] Marquee section with accessible pause/stop control (FR-007b) in `src/components/sections/Marquee.tsx`
-- [ ] T035 [P] [US1] Stats section (animated counters, reduce-motion safe) in `src/components/sections/Stats.tsx`
-- [ ] T036 [P] [US1] Capabilities grid in `src/components/sections/Capabilities.tsx`
-- [ ] T037 [P] [US1] Platform Showcase with tab/tabpanel semantics, first surface default (FR-007d, FR-008) in `src/components/sections/Showcase.tsx`
-- [ ] T038 [P] [US1] Selected Work / case studies in `src/components/sections/Work.tsx`
-- [ ] T039 [P] [US1] Process (sticky, language-aware) in `src/components/sections/Process.tsx`
-- [ ] T040 [P] [US1] Testimonial in `src/components/sections/Testimonial.tsx`
-- [ ] T041 [P] [US1] CTA section + Footer in `src/components/sections/CTA.tsx` and `src/components/layout/Footer.tsx`
-- [ ] T042 [US1] Compose page (all sections + loading states FR-005a) in `src/app/(frontend)/[locale]/page.tsx` (depends on T028–T041)
-- [ ] T043 [US1] Per-locale SEO/social metadata (title, description, OG image) in locale layout (FR-011a)
-- [ ] T044 [US1] Heading order + landmark regions across the page (FR-007a)
-- [ ] T045 [US1] Graceful content-load failure + empty-section collapse (Edge Cases) in `src/lib/content.ts` + page
+- [X] T028 [US1] Content read layer (locale-scoped, published-only, ordered, fallback) via Payload Local API in `src/lib/content.ts` (content-api contract)
+- [X] T029 [P] [US1] Primitive components Button, Pill, Reveal, Counter in `src/components/primitives/`
+- [X] T030 [P] [US1] `LatticeCanvas` primitive (reduced-motion aware, `aria-hidden`) in `src/components/primitives/LatticeCanvas.tsx`
+- [X] T031 [P] [US1] `CustomCursor` + magnetic buttons — disabled on touch/coarse-pointer and reduce-motion; never suppress focus (FR-007c) in `src/components/layout/CustomCursor.tsx`
+- [X] T032 [P] [US1] Nav + `LangToggle` + `ThemeToggle` with accessible names/states (FR-007d) in `src/components/layout/`
+- [X] T033 [P] [US1] Hero section (word-reveal, Thai typography per FR-004) in `src/components/sections/Hero.tsx`
+- [X] T034 [P] [US1] Marquee section with accessible pause/stop control (FR-007b) in `src/components/sections/Marquee.tsx`
+- [X] T035 [P] [US1] Stats section (animated counters, reduce-motion safe) in `src/components/sections/Stats.tsx`
+- [X] T036 [P] [US1] Capabilities grid in `src/components/sections/Capabilities.tsx`
+- [X] T037 [P] [US1] Platform Showcase with tab/tabpanel semantics, first surface default (FR-007d, FR-008) in `src/components/sections/Showcase.tsx`
+- [X] T038 [P] [US1] Selected Work / case studies in `src/components/sections/Work.tsx`
+- [X] T039 [P] [US1] Process (sticky, language-aware) in `src/components/sections/Process.tsx`
+- [X] T040 [P] [US1] Testimonial in `src/components/sections/Testimonial.tsx`
+- [X] T041 [P] [US1] CTA section + Footer in `src/components/sections/CTA.tsx` and `src/components/layout/Footer.tsx`
+- [X] T042 [US1] Compose page (all sections + loading states FR-005a) in `src/app/(frontend)/[locale]/page.tsx` (depends on T028–T041)
+- [X] T043 [US1] Per-locale SEO/social metadata (title, description, OG image) in locale layout (FR-011a)
+- [X] T044 [US1] Heading order + landmark regions across the page (FR-007a)
+- [X] T045 [US1] Graceful content-load failure + empty-section collapse (Edge Cases) in `src/lib/content.ts` + page
 
 **Checkpoint**: Public site fully functional with seeded content — MVP deployable/demoable.
 

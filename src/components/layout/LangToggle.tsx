@@ -1,50 +1,62 @@
 'use client'
 
-import { usePathname, useRouter } from 'next/navigation'
-import { useCallback } from 'react'
+import Link from 'next/link'
+import { useParams, usePathname } from 'next/navigation'
 
-import { LOCALE_COOKIE, type Locale } from '@/lib/i18n'
+import { LOCALES, type Locale, normalizeLocale } from '@/lib/i18n'
+
+const LABELS: Record<Locale, { short: string; accessible: string }> = {
+  en: { short: 'EN', accessible: 'English' },
+  th: { short: 'ไทย', accessible: 'ไทย' },
+}
 
 /**
- * Language toggle EN ⇄ ไทย (FR-002, FR-007d). Swaps the leading locale segment
- * of the current path, persists the choice in a cookie (FR-003), and conveys the
- * active language to assistive tech via aria-pressed on each option.
+ * Build the equivalent path for a target locale by swapping the leading
+ * `/en` | `/th` segment. Falls back to `/${target}` when no locale segment
+ * is present (the URL path is the source of truth — Ambiguity #1).
  */
-export function LangToggle({ current, label }: { current: Locale; label: string }) {
-  const router = useRouter()
-  const pathname = usePathname()
+function swapLocaleInPath(pathname: string, target: Locale): string {
+  const segments = pathname.split('/')
+  // segments[0] is '' (leading slash). segments[1] is the locale segment.
+  const first = segments[1]
+  if (first === 'en' || first === 'th') {
+    segments[1] = target
+    return segments.join('/') || `/${target}`
+  }
+  // No locale prefix: prepend the target locale.
+  const rest = pathname === '/' ? '' : pathname
+  return `/${target}${rest}`
+}
 
-  const switchTo = useCallback(
-    (next: Locale) => {
-      if (next === current) return
-      document.cookie = `${LOCALE_COOKIE}=${next}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`
-      const segments = pathname.split('/')
-      segments[1] = next
-      router.push(segments.join('/') || `/${next}`)
-    },
-    [current, pathname, router],
-  )
+export function LangToggle() {
+  const pathname = usePathname() ?? '/'
+  const params = useParams<{ locale?: string }>()
+  const current = normalizeLocale(params?.locale ?? null)
+
+  function persistLocale(locale: Locale) {
+    // Hint cookie so a later bare-root visit remembers the choice (Ambiguity #1).
+    document.cookie = `wf-locale=${locale};path=/;max-age=31536000;samesite=lax`
+  }
 
   return (
-    <div className="lang-tog" role="group" aria-label={label}>
-      <button
-        type="button"
-        onClick={() => switchTo('en')}
-        aria-pressed={current === 'en'}
-        className={current === 'en' ? 'on' : undefined}
-      >
-        EN
-      </button>
-      <span aria-hidden="true">·</span>
-      <button
-        type="button"
-        onClick={() => switchTo('th')}
-        aria-pressed={current === 'th'}
-        className={current === 'th' ? 'on' : undefined}
-        lang="th"
-      >
-        ไทย
-      </button>
+    <div className="lang-tog" role="group" aria-label="Language">
+      {LOCALES.map((locale) => {
+        const isActive = locale === current
+        const label = LABELS[locale]
+        return (
+          <Link
+            key={locale}
+            href={swapLocaleInPath(pathname, locale)}
+            data-testid={`lang-${locale}`}
+            className={isActive ? 'lk active' : 'lk'}
+            aria-current={isActive ? 'true' : undefined}
+            aria-label={label.accessible}
+            onClick={() => persistLocale(locale)}
+          >
+            {label.short}
+          </Link>
+        )
+      })}
     </div>
   )
 }

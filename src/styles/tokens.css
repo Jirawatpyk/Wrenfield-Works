@@ -21,7 +21,8 @@
   /* font stacks — Latin family first, Thai family as fallback (from next/font, src/lib/fonts.ts) */
   --serif: var(--font-serif), var(--font-serif-th), 'Fraunces', 'Trirong', Georgia, serif;
   --sans: var(--font-sans), var(--font-sans-th), 'Hanken Grotesk', 'Anuphan', system-ui, sans-serif;
-  --mono: var(--font-mono), var(--font-mono-th), 'JetBrains Mono', 'IBM Plex Sans Thai', ui-monospace,
+  --mono:
+    var(--font-mono), var(--font-mono-th), 'JetBrains Mono', 'IBM Plex Sans Thai', ui-monospace,
     monospace;
 
   /* radius */
@@ -57,7 +58,11 @@
   --bg-3: var(--ink-3);
   --fg1: var(--paper);
   --fg2: rgba(236, 229, 216, 0.82);
-  --fg3: var(--slate);
+  /* Muted text. The prototype's --slate (#6e747c) only reaches 3.77:1 on --ink,
+     failing WCAG AA (4.5:1). Lightened to #8e949c so it also clears 4.5:1 on the
+     lighter card surfaces (--bg-2 #1e242c, e.g. `.case .stat`), not just on --ink.
+     NON-NEGOTIABLE AA gate on the dark theme (constitution I/UX). */
+  --fg3: #8e949c;
   --accent: var(--brass-lt);
   --accent-deep: var(--brass);
   --line: rgba(236, 229, 216, 0.14);
@@ -87,17 +92,24 @@ body.paper {
   --fg1: var(--ink);
   --fg2: rgba(21, 24, 29, 0.78);
   --fg3: #6a6256; /* darkened from #7C7568 to clear AA on paper */
-  --accent: var(--brass);
-  --accent-deep: #8a6a30; /* darker brass for AA large-text/icon contrast */
+  /* The prototype brass (#b5894a / #cba265) is far too light for text on a light
+     surface (≈2.5:1). On paper the accent pair is darkened to bronze so brass-coloured
+     TEXT (button labels, the "Works" wordmark, stat units, code keywords, the giant
+     process number) clears AA — 4.5:1 for normal text, 3:1 for large. Decorative brass
+     (lattice/glow/cursor) keeps its own tokens below. */
+  --accent: #7a5e2a; /* ≈4.9:1 on paper bg — readable as text */
+  --accent-deep: #6f5325; /* ≈5.5:1 — solid-button bg, borders, wordmark */
   --line: rgba(21, 24, 29, 0.14);
   --line-strong: rgba(21, 24, 29, 0.2);
-  --nav-bg: rgba(236, 229, 216, 0.74);
-  --nav-bg-scrolled: rgba(236, 229, 216, 0.92);
+  /* Nav bar is translucent + blurred; on paper it must stay opaque enough that brass
+     text on it clears AA regardless of the (light) content scrolling beneath. */
+  --nav-bg: rgba(236, 229, 216, 0.92);
+  --nav-bg-scrolled: rgba(236, 229, 216, 0.97);
   --card-grad: linear-gradient(180deg, rgba(21, 24, 29, 0.018), transparent);
 
   /* tokenized literals adjusted for light mode AA */
   --positive: #2f7a45;
-  --on-accent: var(--paper);
+  --on-accent: #ffffff; /* white on the darkened bronze solid-button bg → ≥5:1 */
   --lattice: #9a7338;
   --cursor: var(--brass);
   --cursor-ring: rgba(154, 115, 56, 0.6);

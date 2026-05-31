@@ -1,5 +1,6 @@
 @import 'tailwindcss';
 @import './tokens.css';
+@import './components.css';
 
 /* ---------- base (ported from the design's reset) ---------- */
 *,
@@ -34,6 +35,106 @@ a {
 img,
 svg {
   display: block;
+}
+
+/* ----------------------------------------------------------------
+   Base typography (ported verbatim from the design's enterprise.css
+   §type scale). This element-level layer was missing, which left
+   section <h2>s, .kicker, .lead, p, .label and .num at browser
+   defaults — the source of the on-screen font-size mismatches.
+   Component rules (e.g. .hero h1, .cta-sec h2) stay more specific and
+   override where the design intends a different size.
+   ---------------------------------------------------------------- */
+::selection {
+  background: var(--accent);
+  color: var(--ink);
+}
+
+h1,
+.h1 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(40px, 7vw, 86px);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+}
+h1 em,
+.h1 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+h2,
+.h2 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(30px, 4.4vw, 52px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+h2 em {
+  font-style: italic;
+  color: var(--accent);
+  font-weight: 400;
+}
+
+h3,
+.h3 {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 23px;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+
+.lead {
+  font-family: var(--sans);
+  font-size: clamp(16px, 1.5vw, 19px);
+  line-height: 1.66;
+  color: var(--fg2);
+}
+
+p {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--fg2);
+}
+
+.kicker {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.kicker-th {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+
+.label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--fg3);
+}
+
+.num {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  color: var(--accent-deep);
+}
+
+.sub-th {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--fg2);
 }
 
 /* fixed-nav offset so anchored sections don't hide under the bar */

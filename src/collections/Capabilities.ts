@@ -2,12 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { isStaff, publishedOrStaff } from '../access'
 import { publishCompletenessHook } from '../lib/validation/publishCompleteness'
-import {
-  localizedText,
-  localizedTextarea,
-  monoText,
-  orderField,
-} from '../fields/localized'
+import { localizedText, localizedTextarea, monoText, orderField } from '../fields/localized'
 
 export const Capabilities: CollectionConfig = {
   slug: 'capabilities',

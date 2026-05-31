@@ -414,7 +414,8 @@ const main = async () => {
     },
     {
       title: 'Wrenfield Works — ระบบระดับองค์กร สร้างอย่างถูกต้อง',
-      description: 'ระบบที่ใช้ AI สร้าง ทำมาอย่างถูกต้อง ทีมอิสระที่ส่งงานได้เหมือนทีมที่ใหญ่กว่าสิบเท่า',
+      description:
+        'ระบบที่ใช้ AI สร้าง ทำมาอย่างถูกต้อง ทีมอิสระที่ส่งงานได้เหมือนทีมที่ใหญ่กว่าสิบเท่า',
     },
   )
 
@@ -424,10 +425,22 @@ const main = async () => {
 
   // --- Stats (4; DICT stat1_k..stat4_k; counts/units mono from §3.4) ----------
   const stats: Array<{ en: Json; th: Json }> = [
-    { en: { value: 60, unit: '+', label: 'Systems shipped to production' }, th: { label: 'ระบบที่ส่งขึ้น production' } },
-    { en: { value: 40, unit: '%', label: 'Average review cycles cut' }, th: { label: 'ลดรอบรีวิวโดยเฉลี่ย' } },
-    { en: { value: 10, unit: '×', label: 'Ship velocity vs. team size' }, th: { label: 'ความเร็วการส่งงานเทียบขนาดทีม' } },
-    { en: { value: 100, unit: '%', label: 'Direct line to the builder' }, th: { label: 'คุยกับคนสร้างโดยตรง' } },
+    {
+      en: { value: 60, unit: '+', label: 'Systems shipped to production' },
+      th: { label: 'ระบบที่ส่งขึ้น production' },
+    },
+    {
+      en: { value: 40, unit: '%', label: 'Average review cycles cut' },
+      th: { label: 'ลดรอบรีวิวโดยเฉลี่ย' },
+    },
+    {
+      en: { value: 10, unit: '×', label: 'Ship velocity vs. team size' },
+      th: { label: 'ความเร็วการส่งงานเทียบขนาดทีม' },
+    },
+    {
+      en: { value: 100, unit: '%', label: 'Direct line to the builder' },
+      th: { label: 'คุยกับคนสร้างโดยตรง' },
+    },
   ]
   await seedRows('stats', stats)
 
@@ -459,7 +472,11 @@ const main = async () => {
         title: 'Automation & workflows',
         description:
           'Pipelines and integrations that remove manual, repetitive work — data flows, reporting, and the glue between the tools a team already runs on.',
-        tags: [{ value: 'ระบบอัตโนมัติ' }, { value: '· Integrations' }, { value: '· Reporting bots' }],
+        tags: [
+          { value: 'ระบบอัตโนมัติ' },
+          { value: '· Integrations' },
+          { value: '· Reporting bots' },
+        ],
       },
       th: {
         title: 'ระบบอัตโนมัติ & เวิร์กโฟลว์',

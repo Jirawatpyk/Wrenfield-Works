@@ -1,8 +1,4 @@
-import type {
-  CollectionBeforeValidateHook,
-  Field,
-  GlobalBeforeValidateHook,
-} from 'payload'
+import type { CollectionBeforeValidateHook, Field, GlobalBeforeValidateHook } from 'payload'
 import { APIError } from 'payload'
 
 /**
@@ -75,7 +71,11 @@ function collectMissing(fields: Field[], data: AnyRecord, prefix: string): strin
       for (const tab of field.tabs) {
         if ('name' in tab && tab.name) {
           missing.push(
-            ...collectMissing(tab.fields, (data?.[tab.name] as AnyRecord) ?? {}, `${prefix}${tab.name}.`),
+            ...collectMissing(
+              tab.fields,
+              (data?.[tab.name] as AnyRecord) ?? {},
+              `${prefix}${tab.name}.`,
+            ),
           )
         } else {
           missing.push(...collectMissing(tab.fields, data, prefix))

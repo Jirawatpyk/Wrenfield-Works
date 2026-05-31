@@ -1,11 +1,7 @@
 import type { Block, CollectionConfig } from 'payload'
 
 import { isStaff, publishedOrStaff } from '../access'
-import {
-  localizedText,
-  monoText,
-  orderField,
-} from '../fields/localized'
+import { localizedText, monoText, orderField } from '../fields/localized'
 import { publishCompletenessHook } from '../lib/validation/publishCompleteness'
 
 const mockRow: Block = {

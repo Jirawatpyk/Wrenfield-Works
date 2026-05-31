@@ -1,12 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-import {
-  DEFAULT_LOCALE,
-  LOCALE_COOKIE,
-  isLocale,
-  localeFromAcceptLanguage,
-} from '@/lib/i18n'
+import { DEFAULT_LOCALE, LOCALE_COOKIE, isLocale, localeFromAcceptLanguage } from '@/lib/i18n'
 
 /**
  * Locale routing (T017). Next.js 16 renamed `middleware.ts` → `proxy.ts`
@@ -38,16 +33,16 @@ export function proxy(request: NextRequest): NextResponse {
   const segments = pathname.split('/')
   const first = segments[1]
 
-  // Already locale-prefixed: pass through, refreshing the persistence cookie.
+  // Already locale-prefixed: the URL path is the source of truth. Always
+  // set/refresh the persistence cookie so a later bare-root visit ("/")
+  // remembers the explicitly-visited locale and its TTL never silently lapses.
   if (isLocale(first)) {
     const res = NextResponse.next()
-    if (request.cookies.get(LOCALE_COOKIE)?.value !== first) {
-      res.cookies.set(LOCALE_COOKIE, first, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365,
-        sameSite: 'lax',
-      })
-    }
+    res.cookies.set(LOCALE_COOKIE, first, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    })
     return res
   }
 

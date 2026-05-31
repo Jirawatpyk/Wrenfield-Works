@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import Script from 'next/script'
 import type { ReactNode } from 'react'
 
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
@@ -37,10 +38,27 @@ export default async function FrontendLayout({
   if (!isLocale(locale)) notFound()
 
   return (
-    <html lang={locale} className={fontVariables}>
-      <body className={locale === 'th' ? 'lang-th' : undefined}>
-        {/* Apply persisted theme + reduced-motion before first paint (no FOUC). */}
-        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+    <html
+      lang={locale}
+      className={fontVariables}
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
+      <body className={locale === 'th' ? 'lang-th' : undefined} suppressHydrationWarning>
+        {/*
+          Apply the persisted theme + OS reduced-motion before hydration (no FOUC).
+          Rendered via next/script `beforeInteractive`, NOT a raw <script>: Next hoists it
+          ahead of hydration so React never reconciles a <script> element (which in React 19
+          logs "Encountered a script tag while rendering React component"). It must sit inside
+          <body> — the boot script sets classes on `document.body`, which does not exist yet
+          if the script runs during <head> parsing. `suppressHydrationWarning` on <html>/<body>
+          covers the body class the script adds before React hydrates (a benign mismatch).
+        */}
+        <Script
+          id="wf-theme-boot"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: themeBootScript }}
+        />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>

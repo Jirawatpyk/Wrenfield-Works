@@ -92,9 +92,14 @@ export default buildConfig({
     user: 'users',
     // The back-office editing UI must also meet WCAG 2.1 AA (FR-007).
     components: {
+      // Use the `@/*` tsconfig alias (-> ./src/*) rather than a leading-slash
+      // path: Payload resolves leading-slash paths relative to importMap.baseDir
+      // (defaults to repo ROOT, not src/), so a `/components/...` path would emit
+      // `../../../../components/...` and miss our src/ tree. The alias is written
+      // verbatim and resolved by Next, matching how src/lib is imported elsewhere.
       graphics: {
-        Logo: '/components/admin/BrandLogo#BrandLogo',
-        Icon: '/components/admin/BrandIcon#BrandIcon',
+        Logo: '@/components/admin/BrandLogo#BrandLogo',
+        Icon: '@/components/admin/BrandIcon#BrandIcon',
       },
     },
     meta: {

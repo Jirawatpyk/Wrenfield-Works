@@ -119,6 +119,37 @@ const main = async () => {
   const payload = await getPayload({ config })
   const log = (msg: string) => payload.logger.info(`[seed] ${msg}`)
 
+  // --- Back-office admin bootstrap (T053, FR-012) ---------------------------
+  // One staff user so editors can sign in to /admin. Idempotent; credentials are
+  // env-overridable and default to the local dev values. NEVER seed real
+  // production credentials this way — set ADMIN_EMAIL / ADMIN_PASSWORD in the
+  // deployment environment instead.
+  // Refuse to seed a publicly-known default credential in production.
+  if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+    throw new Error(
+      '[seed] ADMIN_PASSWORD must be set in production — refusing to create an admin with a default password.',
+    )
+  }
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@wrenfield.test'
+  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1234!pw'
+  const existingAdmin = await payload.find({
+    collection: 'users',
+    where: { email: { equals: adminEmail } },
+    limit: 1,
+    overrideAccess: true,
+  })
+  if (existingAdmin.docs.length === 0) {
+    await payload.create({
+      collection: 'users',
+      data: { email: adminEmail, password: adminPassword, name: 'Wrenfield Admin' },
+      overrideAccess: true,
+    })
+    // Do not log the email (PII); ADMIN_EMAIL is known to whoever ran the seed.
+    log('admin user created')
+  } else {
+    log('admin user already exists')
+  }
+
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------

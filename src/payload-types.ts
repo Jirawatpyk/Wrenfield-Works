@@ -905,6 +905,9 @@ export interface CallToAction {
          * Intentionally English-only (brand/technical label).
          */
         label: string;
+        /**
+         * Absolute URL (https://…), mailto:, tel:, or in-page #anchor.
+         */
         url: string;
         id?: string | null;
       }[]
@@ -923,6 +926,9 @@ export interface Footer {
   studioLinks?:
     | {
         label: string;
+        /**
+         * In-page #anchor (e.g. #work) or an absolute URL.
+         */
         anchor: string;
         id?: string | null;
       }[]
@@ -933,6 +939,9 @@ export interface Footer {
          * Intentionally English-only (brand/technical label).
          */
         label: string;
+        /**
+         * Absolute URL (https://…), mailto:, tel:, or in-page #anchor.
+         */
         url: string;
         id?: string | null;
       }[]

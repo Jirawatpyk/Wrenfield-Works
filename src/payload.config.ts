@@ -4,7 +4,19 @@ import { fileURLToPath } from 'url'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
+import type { CollectionConfig, GlobalConfig } from 'payload'
 import sharp from 'sharp'
+
+import { conflictDetectionHook } from './lib/concurrency'
+import { assertPreviewSecret, buildPreviewPath } from './lib/preview'
+import {
+  revalidateAfterChange,
+  revalidateAfterDelete,
+  revalidateGlobalAfterChange,
+} from './lib/revalidate'
+
+// Fail fast at startup if the draft-preview secret is missing/weak in production (FR-018, Security).
+assertPreviewSecret()
 
 import { Capabilities } from './collections/Capabilities'
 import { CaseStudies } from './collections/CaseStudies'
@@ -25,6 +37,42 @@ import { Testimonial } from './globals/Testimonial'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/**
+ * US2 cross-cutting wiring applied to every CONTENT collection/global (not Users/Media):
+ *   - conflict detection (FR-020a) appended after the publish-completeness gate,
+ *   - on-publish revalidation (FR-016) on change/delete,
+ *   - a draft "Preview" target (FR-018) — the whole site is one page per locale.
+ * Centralized here so each collection/global stays a plain content definition.
+ */
+const withCollectionContent = (c: CollectionConfig): CollectionConfig => ({
+  ...c,
+  admin: {
+    ...c.admin,
+    preview:
+      c.admin?.preview ?? ((_doc, ctx) => buildPreviewPath((ctx as { locale?: string })?.locale)),
+  },
+  hooks: {
+    ...c.hooks,
+    beforeValidate: [...(c.hooks?.beforeValidate ?? []), conflictDetectionHook],
+    afterChange: [...(c.hooks?.afterChange ?? []), revalidateAfterChange],
+    afterDelete: [...(c.hooks?.afterDelete ?? []), revalidateAfterDelete],
+  },
+})
+
+const withGlobalContent = (g: GlobalConfig): GlobalConfig => ({
+  ...g,
+  admin: {
+    ...g.admin,
+    preview:
+      g.admin?.preview ?? ((_doc, ctx) => buildPreviewPath((ctx as { locale?: string })?.locale)),
+  },
+  hooks: {
+    ...g.hooks,
+    beforeValidate: [...(g.hooks?.beforeValidate ?? []), conflictDetectionHook],
+    afterChange: [...(g.hooks?.afterChange ?? []), revalidateGlobalAfterChange],
+  },
+})
 
 /**
  * Single source of truth for the embedded Payload CMS.
@@ -53,15 +101,13 @@ export default buildConfig({
   editor: lexicalEditor(),
 
   // Ordered, repeatable content + auth + media (data-model.md). Inquiries added in US3 (T070).
+  // Content collections carry the US2 cross-cutting wiring; Users/Media do not.
   collections: [
     Users,
     Media,
-    Stats,
-    ClientLogos,
-    Capabilities,
-    CaseStudies,
-    ProcessSteps,
-    ShowcaseSurfaces,
+    ...[Stats, ClientLogos, Capabilities, CaseStudies, ProcessSteps, ShowcaseSurfaces].map(
+      withCollectionContent,
+    ),
   ],
 
   // Singletons (data-model.md).
@@ -74,7 +120,7 @@ export default buildConfig({
     CallToAction,
     Footer,
     SEOMetadata,
-  ],
+  ].map(withGlobalContent),
 
   secret: process.env.PAYLOAD_SECRET || '',
 

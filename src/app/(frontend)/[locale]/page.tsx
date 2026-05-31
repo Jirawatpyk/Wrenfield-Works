@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
 import { CustomCursor } from '@/components/layout/CustomCursor'
@@ -54,7 +55,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   if (!isLocale(raw)) notFound()
   const locale: Locale = raw
 
-  const c = await getSiteContent(locale)
+  // Draft mode (enabled by the /api/preview route for authenticated editors) renders
+  // the latest unpublished draft so editors can preview before publishing (FR-018);
+  // public visitors never have it enabled, so they only ever see published content.
+  const { isEnabled: draft } = await draftMode()
+  const c = await getSiteContent(locale, { draft })
 
   return (
     <>

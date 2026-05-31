@@ -194,6 +194,12 @@ async function fetchAllLocales(
         collection: args.collection.slug,
         id: id as string | number,
         locale: 'all',
+        // Disable locale fallback: with `localization.fallback` on, a blank locale
+        // value is back-filled from the other locale even under `locale:'all'`
+        // (verified empirically), which would let an EN-only document slip past the
+        // gate. `'none'` disables read-time fallback so a never-written locale comes
+        // back absent and is detectable (FR-014).
+        fallbackLocale: 'none',
         draft: true,
         depth: 0,
         overrideAccess: true,
@@ -204,13 +210,17 @@ async function fetchAllLocales(
       return (await req.payload.findGlobal({
         slug: args.global.slug,
         locale: 'all',
+        fallbackLocale: 'none',
         draft: true,
         depth: 0,
         overrideAccess: true,
         req,
       })) as unknown as AnyRecord
     }
-  } catch {
+  } catch (err) {
+    // Surface a degraded completeness check (transient DB error) instead of silently
+    // proceeding on partial data — the gate only runs on the publish transition.
+    req.payload?.logger?.error?.({ err }, 'publish-completeness: locale:all read failed')
     return {}
   }
   return {}
@@ -226,10 +236,17 @@ export const publishCompletenessHook: CollectionBeforeValidateHook &
   if (!data || data._status !== 'published') return data
 
   const fields = getFields(args)
-  const active: 'en' | 'th' = req.locale === 'th' ? 'th' : 'en'
-
   const stored = await fetchAllLocales(args)
-  const merged = overlayActiveLocale(fields, stored, data, active)
+
+  // Overlay the incoming active-locale write onto the stored {en,th} maps so a
+  // clear-then-publish in one save is caught. Only the two known locales can be
+  // "active"; for any other context (e.g. Payload's internal locale:'all'), skip the
+  // overlay and validate the stored doc as-is rather than mis-overlaying onto EN.
+  const rawLocale = (req as { locale?: string }).locale
+  const merged =
+    rawLocale === 'en' || rawLocale === 'th'
+      ? overlayActiveLocale(fields, stored, data, rawLocale)
+      : stored
 
   const missing = collectMissing(fields, merged, '')
   if (missing.length > 0) {

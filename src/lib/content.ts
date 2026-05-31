@@ -308,22 +308,37 @@ async function getClient() {
   return getPayload({ config })
 }
 
-export async function getSiteContent(locale: Locale): Promise<SiteContent> {
+export async function getSiteContent(
+  locale: Locale,
+  opts: { draft?: boolean } = {},
+): Promise<SiteContent> {
   const payload = await getClient()
+  // In draft preview (FR-018) we read the latest draft and bypass the published-only
+  // access rule; the preview route already verified an authenticated staff session.
+  const { draft = false } = opts
 
   const global = (slug: string) =>
-    payload.findGlobal({ slug: slug as never, locale, fallbackLocale: DEFAULT_LOCALE, depth: 1 })
+    payload.findGlobal({
+      slug: slug as never,
+      locale,
+      fallbackLocale: DEFAULT_LOCALE,
+      depth: 1,
+      draft,
+      overrideAccess: draft,
+    })
 
   const collection = (slug: string) =>
     payload.find({
       collection: slug as never,
-      where: { _status: { equals: 'published' } },
+      where: draft ? {} : { _status: { equals: 'published' } },
       sort: 'order',
       locale,
       fallbackLocale: DEFAULT_LOCALE,
       depth: 1,
       limit: 100,
       pagination: false,
+      draft,
+      overrideAccess: draft,
     })
 
   const [

@@ -120,27 +120,27 @@ collection item; publish with TH missing is blocked; concurrent stale save is wa
 
 ### Tests for User Story 2 (write first, must fail) ⚠️
 
-- [ ] T046 [P] [US2] Integration: deny-by-default — unauthenticated admin/API access redirected in `tests/integration/us2-auth.spec.ts`
-- [ ] T047 [P] [US2] Integration: publish blocked when EN or TH missing, with field-identifying message in `tests/integration/us2-publish-gate.spec.ts`
-- [ ] T048 [P] [US2] Integration: optimistic-concurrency conflict on stale save in `tests/integration/us2-conflict.spec.ts`
-- [ ] T049 [P] [US2] Integration: stat numeric validation rejects non-number; URL validation in `tests/integration/us2-validation.spec.ts`
-- [ ] T050 [P] [US2] E2E: edit hero EN+TH → publish → visible; draft/preview hidden from public in `tests/e2e/us2-edit-publish.spec.ts`
-- [ ] T051 [P] [US2] E2E: add/remove (with confirmation)/reorder a collection item in `tests/e2e/us2-collections.spec.ts`
-- [ ] T052 [P] [US2] E2E a11y: back-office editing UI meets WCAG 2.1 AA (keyboard + axe) in `tests/e2e/us2-admin-a11y.spec.ts`
+- [X] T046 [P] [US2] Integration: deny-by-default — unauthenticated admin/API access redirected in `tests/integration/us2-auth.spec.ts`
+- [X] T047 [P] [US2] Integration: publish blocked when EN or TH missing, with field-identifying message in `tests/integration/us2-publish-gate.spec.ts`
+- [X] T048 [P] [US2] Integration: optimistic-concurrency conflict on stale save in `tests/integration/us2-conflict.spec.ts`
+- [X] T049 [P] [US2] Integration: stat numeric validation rejects non-number; URL validation in `tests/integration/us2-validation.spec.ts` (+ `tests/integration/us2-preview-route.spec.ts` for the FR-017 preview-route security gates)
+- [X] T050 [P] [US2] E2E: edit hero EN+TH → publish → visible; draft/preview hidden from public in `tests/e2e/us2-edit-publish.spec.ts`
+- [ ] T051 [P] [US2] E2E: add/remove (with confirmation)/reorder a collection item in `tests/e2e/us2-collections.spec.ts` — _authored; needs Payload 3.85 admin DOM selector tuning (delete is behind an unnamed doc-controls kebab → confirm modal). Capability is built-in + `orderField` (T059)._
+- [ ] T052 [P] [US2] E2E a11y: back-office editing UI meets WCAG 2.1 AA (keyboard + axe) in `tests/e2e/us2-admin-a11y.spec.ts` — _authored; runs axe against Payload's own admin UI; needs a live assessment + (per review) an error-toast `role="alert"` axe scenario._
 
 ### Implementation for User Story 2
 
-- [ ] T053 [US2] Payload auth + deny-by-default access control on all collections/globals/admin (FR-012, admin-auth contract) in `src/payload.config.ts` + `src/access/`
-- [ ] T054 [US2] Auth-failure handling: non-revealing errors, lockout/rate-limit, session expiry (FR-021a) in `src/lib/auth/`
-- [ ] T055 [US2] Wire publish-completeness gate UX with clear messages (FR-014) using the T015 hook
-- [ ] T056 [US2] Draft + live preview reflecting drafts, hidden from public (FR-017, FR-018) in preview route + `src/lib/content.ts`
-- [ ] T057 [US2] Optimistic-concurrency conflict detection + warning + load-latest/re-apply flow, no silent discard (FR-020a)
-- [ ] T058 [US2] Per-type content validation + actionable messages (stats numeric, links valid) (FR-019)
-- [ ] T059 [US2] Collection management UX: explicit ordering control + delete confirmation (FR-015)
-- [ ] T060 [US2] SEO metadata editing in CMS (EN/TH + OG image upload) (FR-015a)
-- [ ] T061 [US2] Audit trail (who/when) on published changes via Payload versions (FR-020)
-- [ ] T062 [US2] On-publish revalidation so published content appears immediately (FR-016)
-- [ ] T063 [US2] CSRF + injection + XSS output-encoding protections on back-office operations (FR-021)
+- [X] T053 [US2] Payload auth + deny-by-default access control on all collections/globals/admin (FR-012, admin-auth contract) in `src/payload.config.ts` + `src/access/` (+ idempotent admin bootstrap in `src/seed/seed.ts`, prod-guarded)
+- [X] T054 [US2] Auth-failure handling: non-revealing errors, lockout/rate-limit, session expiry (FR-021a) — Payload `Users.auth` (maxLoginAttempts/lockTime/tokenExpiration) + Payload's non-revealing default sign-in errors
+- [X] T055 [US2] Wire publish-completeness gate UX with clear messages (FR-014) using the T015 hook — **also fixed a real gate bypass: globals back-filled a blank locale via fallback; the gate now reads `fallbackLocale:'none'`**
+- [X] T056 [US2] Draft + live preview reflecting drafts, hidden from public (FR-017, FR-018) in `src/app/api/preview/route.ts` (HMAC-signed token + session check) + draft read in `src/lib/content.ts` + `draftMode()` in the page
+- [X] T057 [US2] Optimistic-concurrency conflict detection + warning + load-latest/re-apply flow, no silent discard (FR-020a) in `src/lib/concurrency.ts`
+- [X] T058 [US2] Per-type content validation + actionable messages (stats numeric, links valid) (FR-019) in `src/lib/validation/url.ts` (honors `required`)
+- [X] T059 [US2] Collection management UX: explicit ordering control + delete confirmation (FR-015) — `orderField` + Payload's built-in delete-confirm modal (e2e proof T051 pending)
+- [X] T060 [US2] SEO metadata editing in CMS (EN/TH + OG image upload) (FR-015a) — `SEOMetadata` global (localized title/description + `ogImage` → Media)
+- [X] T061 [US2] Audit trail (who/when) on published changes via Payload versions (FR-020) — `versions:{drafts:true}` on all content collections/globals
+- [X] T062 [US2] On-publish revalidation so published content appears immediately (FR-016) in `src/lib/revalidate.ts` (afterChange/afterDelete → `revalidatePath('/en','/th')`, failure-logged)
+- [X] T063 [US2] CSRF + injection + XSS output-encoding protections on back-office operations (FR-021) — Payload CSRF allow-list + Drizzle parameterized queries + React output-encoding + safe preview redirect (no open-redirect, HMAC token)
 
 **Checkpoint**: Non-technical staff can fully manage the site; US1 + US2 work independently.
 

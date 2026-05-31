@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 import { isStaff, publishedOrStaff } from '../access'
 import { publishCompletenessHook } from '../lib/validation/publishCompleteness'
+import { validateLinkUrl } from '../lib/validation/url'
 import { localizedText, monoText } from '../fields/localized'
 
 export const Footer: GlobalConfig = {
@@ -16,7 +17,13 @@ export const Footer: GlobalConfig = {
       type: 'array',
       fields: [
         localizedText({ name: 'label', required: true }),
-        { name: 'anchor', type: 'text', required: true },
+        {
+          name: 'anchor',
+          type: 'text',
+          required: true,
+          validate: validateLinkUrl,
+          admin: { description: 'In-page #anchor (e.g. #work) or an absolute URL.' },
+        },
       ],
     },
     {
@@ -24,7 +31,13 @@ export const Footer: GlobalConfig = {
       type: 'array',
       fields: [
         monoText({ name: 'label', required: true }),
-        { name: 'url', type: 'text', required: true },
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+          validate: validateLinkUrl,
+          admin: { description: 'Absolute URL (https://…), mailto:, tel:, or in-page #anchor.' },
+        },
       ],
     },
     localizedText({ name: 'bottomNote', required: true }),

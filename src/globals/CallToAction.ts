@@ -2,6 +2,7 @@ import type { GlobalConfig } from 'payload'
 
 import { isStaff, publishedOrStaff } from '../access'
 import { publishCompletenessHook } from '../lib/validation/publishCompleteness'
+import { validateLinkUrl } from '../lib/validation/url'
 import { localizedText, localizedRichText, monoText } from '../fields/localized'
 
 export const CallToAction: GlobalConfig = {
@@ -21,7 +22,13 @@ export const CallToAction: GlobalConfig = {
       type: 'array',
       fields: [
         monoText({ name: 'label', required: true }),
-        { name: 'url', type: 'text', required: true },
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+          validate: validateLinkUrl,
+          admin: { description: 'Absolute URL (https://…), mailto:, tel:, or in-page #anchor.' },
+        },
       ],
     },
   ],

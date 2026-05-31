@@ -8,12 +8,16 @@ A **Spec-Kit-driven** project. The single active feature is **Wrenfield Works En
 — a bilingual (EN/ไทย) marketing site that faithfully reproduces an approved design, plus a
 self-hosted CMS for non-technical editors.
 
-**Current state (branch `001-enterprise-site-cms`):** Phases 1–3 are implemented — the scaffold,
-Payload collections/globals, i18n locale routing, theming, seed, and **User Story 1 (the public
-bilingual site MVP)** are built and passing tests. **Not yet built:** the inquiry write-path
-(`src/app/api/inquiries/`), email, cookieless analytics, and the 24-month retention job (User
-Stories 2–3). Where this doc describes those in the present tense, treat them as the target design,
-not shipped code.
+**Current state (branch `001-enterprise-site-cms`):** Phases 1–4 are implemented — the scaffold,
+Payload collections/globals, i18n locale routing, theming, seed, **User Story 1 (the public
+bilingual site MVP)**, and **User Story 2 (the CMS back office)** are built and passing tests. US2
+adds: deny-by-default access + admin bootstrap, the enforced EN/TH publish-completeness gate
+(`src/lib/validation/publishCompleteness.ts`), optimistic-concurrency conflict detection
+(`src/lib/concurrency.ts`), per-type/URL validation (`src/lib/validation/url.ts`), draft preview
+(`src/app/api/preview/route.ts`, HMAC-signed), and on-publish revalidation (`src/lib/revalidate.ts`).
+**Not yet built (User Story 3):** the inquiry write-path (`src/app/api/inquiries/`), email,
+cookieless analytics, and the 24-month retention job. Where this doc describes those in the present
+tense, treat them as the target design, not shipped code.
 
 The authoritative source of truth for *what* to build lives in `specs/001-enterprise-site-cms/`.
 **Read `spec.md` and `plan.md` before writing any implementation code.** Other key artifacts:

@@ -14,13 +14,13 @@ import { APIError } from 'payload'
  * advances the timestamp, or any non-conflicting flow such as the seed) is never
  * blocked — so this is backward-compatible with existing writes.
  *
- * KNOWN LIMITATION (tracked follow-up): `updatedAt` is auto-managed by Payload, and a drafts-enabled
- * document's draft vs published versions diverge — so in the admin this comparison can occasionally
- * false-positive on rapid publish/save sequences. It is a CONSERVATIVE failure (nothing is
- * overwritten; the editor reloads). Concurrent admin editing is also guarded by Payload's built-in
- * document locking; migrating FR-020a fully onto that lock (and dropping this hook) is the planned
- * follow-up. This hook reliably guards direct-API updates that send a stale `updatedAt`
- * (covered by tests/integration/us2-conflict.spec.ts).
+ * FR-020a is enforced in TWO layers: (1) Payload's built-in DOCUMENT LOCKING (wired in
+ * payload.config.ts) warns at OPEN time when another editor already holds the document; (2) this
+ * OPTIMISTIC save-time check (the approach research.md chose over pessimistic locking) rejects a
+ * write whose `updatedAt` predates the stored value. In normal single-editor use the form's
+ * `updatedAt` matches stored, so this never false-positives; it can only trip on rapid scripted
+ * save/publish sequences against a drafts-enabled doc (and even then it is a CONSERVATIVE failure —
+ * nothing is overwritten; the editor reloads). Verified by tests/integration/us2-conflict.spec.ts.
  */
 /** Normalize an ISO string or Date to epoch ms (NaN if unparseable). */
 function toMs(value: unknown): number {

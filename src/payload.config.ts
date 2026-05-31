@@ -47,6 +47,9 @@ const dirname = path.dirname(filename)
  */
 const withCollectionContent = (c: CollectionConfig): CollectionConfig => ({
   ...c,
+  // Open-time concurrent-edit guard (FR-020a, defense-in-depth alongside the optimistic
+  // save-time check in src/lib/concurrency.ts): Payload warns when another editor holds the doc.
+  lockDocuments: c.lockDocuments ?? { duration: 300 },
   admin: {
     ...c.admin,
     preview:
@@ -62,6 +65,8 @@ const withCollectionContent = (c: CollectionConfig): CollectionConfig => ({
 
 const withGlobalContent = (g: GlobalConfig): GlobalConfig => ({
   ...g,
+  // Open-time concurrent-edit guard (FR-020a, defense-in-depth — see the collection wrapper).
+  lockDocuments: g.lockDocuments ?? { duration: 300 },
   admin: {
     ...g.admin,
     preview:

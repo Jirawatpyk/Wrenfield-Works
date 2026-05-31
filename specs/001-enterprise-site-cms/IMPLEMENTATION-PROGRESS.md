@@ -9,7 +9,17 @@
 ## Environment (verified 2026-05-31)
 - Node v20.19.5 (≥20.9 ✓ for Next 16), pnpm 10.17.1, npm 11.6.1, Docker 29.2.0, git 2.52, corepack 0.33.
 - OS Windows 11, PowerShell. Repo: `C:\Users\Jiraw\OneDrive\Documents\Wrenfield Works`. Branch `001-enterprise-site-cms`.
-- App code NOT yet scaffolded. Only specs/.specify/.claude/docs exist.
+
+## >>> RESUME HERE (start of a fresh session) <<<
+**Phase 1 (T001–T008) + Phase 2 (T009–T020) COMPLETE & committed.** HEAD = `501209f` (Phase 2), prev `21feaa4` (Phase 1). Working tree clean. Postgres running in Docker (`wrenfieldworks-db-1`, healthy, port 5432) and SEEDED (8 globals + 25 rows, bilingual, published). Tasks T001–T020 marked [X] in tasks.md.
+- To run locally: set env (PAYLOAD_SECRET=devsecretdevsecretdevsecret012345, DATABASE_URI=postgres://wrenfield:wrenfield@localhost:5432/wrenfield, NEXT_PUBLIC_SERVER_URL=http://localhost:3000, NODE_ENV=development), then `pnpm dev`. `/en` `/th` render a PLACEHOLDER page (real design = Phase 3). `/admin` = Payload (create first user). `/health` = db probe. `pnpm seed` is idempotent.
+- **NEXT: Phase 3 = User Story 1 (T021–T045), the MVP public site.** TDD MANDATORY: write e2e/unit tests FIRST (T021–T027a, must fail) → then content read layer (T028 `src/lib/content.ts`, locale-scoped, published-only, **sort by `order`**, fallback, empty-collection→omit, via Payload Local API getPayload({config})) → primitives (T029 Button/Pill/Reveal/Counter, T030 LatticeCanvas, T031 CustomCursor+magnetic) → T032 Nav (LangToggle/ThemeToggle ALREADY built in src/components/layout!) → sections T033–T041 (Hero/Marquee/Stats/Capabilities/Showcase/Work/Process/Testimonial/CTA+Footer) → T042 compose page (replace placeholder `src/app/(frontend)/[locale]/page.tsx`) → T043 per-locale SEO metadata → T044 heading order+landmarks → T045 graceful fail/empty collapse.
+- Design fidelity: ALL tokens already in `src/styles/tokens.css`; full component CSS, lattice constants, animation timings, breakpoints, and section structure are in `specs/001-enterprise-site-cms/design-extract.md` (§3 structure, §4 interactions, §5 breakpoints). Port enterprise.css component styles into globals.css/component CSS using existing tokens. Honor prefers-reduced-motion (theme boot script sets body.motion-off).
+- Reuse: LangToggle.tsx, ThemeToggle.tsx, ThemeProvider (src/components), content via Payload Local API, fields helpers. monoText fields = English-only both locales (FR-011).
+- Read first on resume: this file, then `design-extract.md`, then `tasks.md` (T021+). Memory file: `payload-next16-gotchas.md` (pnpm hoisted, payload-run top-level await, locale:all gate, carryIds).
+## >>> END RESUME <<<
+
+- App code scaffolded through Phase 2 (was: not yet scaffolded).
 - NOTE: large tool outputs get truncated from the user's view → keep reads chunked, commands quiet, offload to files.
 
 ## Stack (from plan.md)

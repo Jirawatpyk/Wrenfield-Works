@@ -403,8 +403,9 @@ describe('collectLocaleStatus', () => {
     expect(s.thComplete).toBe(false)
     expect(s.empty).toBe(false)
     expect(s.missing).toEqual([
-      { path: 'kicker', label: 'Kicker', en: false, th: true },
-      { path: 'rows[0].label', label: 'Row label', en: false, th: true },
+      // en/th are TRUE when that locale is FILLED → EN filled, TH gap.
+      { path: 'kicker', label: 'Kicker', en: true, th: false },
+      { path: 'rows[0].label', label: 'Row label', en: true, th: false },
     ])
   })
 

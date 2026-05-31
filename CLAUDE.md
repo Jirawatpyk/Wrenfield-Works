@@ -4,9 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A **Spec-Kit-driven** project. Planning is complete; **application code is not yet scaffolded**. The
-single active feature is **Wrenfield Works Enterprise Site + CMS** — a bilingual (EN/ไทย) marketing
-site that faithfully reproduces an approved design, plus a self-hosted CMS for non-technical editors.
+A **Spec-Kit-driven** project. The single active feature is **Wrenfield Works Enterprise Site + CMS**
+— a bilingual (EN/ไทย) marketing site that faithfully reproduces an approved design, plus a
+self-hosted CMS for non-technical editors.
+
+**Current state (branch `001-enterprise-site-cms`):** Phases 1–3 are implemented — the scaffold,
+Payload collections/globals, i18n locale routing, theming, seed, and **User Story 1 (the public
+bilingual site MVP)** are built and passing tests. **Not yet built:** the inquiry write-path
+(`src/app/api/inquiries/`), email, cookieless analytics, and the 24-month retention job (User
+Stories 2–3). Where this doc describes those in the present tense, treat them as the target design,
+not shipped code.
 
 The authoritative source of truth for *what* to build lives in `specs/001-enterprise-site-cms/`.
 **Read `spec.md` and `plan.md` before writing any implementation code.** Other key artifacts:
@@ -31,25 +38,27 @@ Other gated principles: **i18n** (every user-facing string has EN *and* TH befor
 **Stability & Performance** (budgets + observability), **UI** (token-driven reusable components),
 **Code Quality** (lint/format/type pass, ≥80% coverage on business-logic modules, review required).
 
-## Planned stack & commands
+## Stack & commands
 
-Stack: **Next.js 16** (App Router, React 19) + **Payload CMS 3.x** (mounted in the same Next app) +
-**PostgreSQL 16**, TypeScript, Tailwind tokens. Node ≥ 20.9. Hosted in an Asia/Singapore region for
-PDPA data residency.
+Stack: **Next.js 16** (App Router, React 19) + **Payload CMS 3.85** (mounted in the same Next app) +
+**PostgreSQL 16**, TypeScript, Tailwind v4 tokens. Node ≥ 20.9, pnpm 10. Hosted in an Asia/Singapore
+region for PDPA data residency.
 
-Commands below come from `quickstart.md` and **only work after Phase 1 scaffolding** (`/speckit-implement`):
+Commands (from `package.json`; the scaffold is in place, so these run today):
 
 ```bash
 pnpm install
-docker compose up -d db      # local Postgres (prod is Singapore-region)
-pnpm dev                     # public site at /en and /th; admin at /admin
-pnpm seed                    # seed EN/TH content from the approved design
+docker compose up -d db                  # local Postgres (prod is Singapore-region)
+pnpm dev                                  # public site at /en and /th; admin at /admin
+pnpm seed                                 # PAYLOAD_SEED=true payload run src/seed/seed.ts
+pnpm generate:types                       # regenerate src/payload-types.ts after schema edits
 
-pnpm test                    # Vitest unit + integration (Payload Local API on a test DB)
-pnpm test -- <file>          # run a single test file
-pnpm test:e2e                # Playwright journeys + @axe-core/playwright WCAG 2.1 AA checks
-pnpm lint                    # ESLint + Prettier + tsc
-pnpm lhci                    # Lighthouse CI — asserts performance budgets
+pnpm test                                 # Vitest unit + integration (Payload Local API on a test DB)
+pnpm test tests/unit/format.spec.ts       # run a single test file
+pnpm test:e2e                             # Playwright journeys + @axe-core/playwright WCAG 2.1 AA
+pnpm lint                                 # eslint . && prettier --check . && tsc --noEmit (all three)
+pnpm lint:fix                             # eslint --fix + prettier --write
+pnpm lhci                                 # Lighthouse CI — asserts performance budgets
 ```
 
 Performance budgets (CI-enforced): LCP < 2.5s, INP < 200ms, CLS < 0.1, public route JS ≤ 200 KB
@@ -60,11 +69,18 @@ gzipped, "usable within 3s" on mid-tier mobile/4G.
 One Next.js application hosts **both** the public site and the Payload-powered back office, sharing
 one Postgres database — no separate CMS service.
 
+**As-built layout:** App Router uses two route groups — `src/app/(frontend)/[locale]/` (public,
+per-locale) and `src/app/(payload)/` (admin UI + REST/GraphQL, never locale-prefixed) — plus
+`src/app/health/route.ts`. Client design components live in
+`src/components/{layout,primitives,sections,providers}/`. Design tokens are split across
+`src/styles/{tokens,globals,components}.css` (ported from the prototype's `enterprise.css`). Access
+control is deny-by-default in `src/access/`; the shared localized-field helper is in `src/fields/`.
+
 - **Content model** (`src/collections/`, `src/globals/`): Payload *globals* are singletons (Hero,
   NavLabels, Marquee, SectionHeadings, Testimonial, CallToAction, Footer, SEOMetadata); *collections*
   are ordered/repeatable (Capabilities, CaseStudies, ProcessSteps, Stats, ClientLogos,
-  ShowcaseSurfaces) plus Inquiries, Users, Media. Localized fields carry separate EN/TH values; a
-  shared publish-completeness hook blocks publishing when either locale is empty.
+  ShowcaseSurfaces) plus Users, Media — and Inquiries (planned, US2). Localized fields carry separate
+  EN/TH values; a shared publish-completeness hook blocks publishing when either locale is empty.
 - **Public rendering** (`src/app/(frontend)/[locale]/`): reads *published* content via Payload's
   Local API (in-process, fast), rendered server-side/statically per locale; on-publish revalidation
   makes changes appear immediately. Bespoke design behavior (lattice canvas, custom cursor, magnetic
@@ -73,8 +89,9 @@ one Postgres database — no separate CMS service.
 - **Inquiries** (`src/app/api/inquiries/`): the only public *write* path — validates (Zod), spam-
   checks (challenge + honeypot + rate limit), persists with consent + a 24-month `expiresAt`, then
   best-effort emails the studio (email failure must never lose the stored inquiry).
-- **Business logic** (`src/lib/`): content mapping, i18n, email, analytics, validation, logging,
-  retention — kept here so it is independently unit-testable.
+- **Business logic** (`src/lib/`): today — content mapping, i18n, validation, logging, observability,
+  richtext, theme, formatting, safe-href. Planned (US2–3) — email, analytics, retention. Kept here so
+  each is independently unit-testable.
 
 ## Project-specific rules that bite (non-obvious)
 
@@ -90,6 +107,8 @@ one Postgres database — no separate CMS service.
 - Intentionally **English-only labels** are an explicit enumerated set (section numbers, mono
   category tags, KPI units, status pills, brand/client names); everything else is translatable prose.
 - All personal data stays in the Singapore region; data in transit uses TLS.
+- Env config lives in `.env.example` (copy to `.env`, never commit). It already enumerates the vars
+  for DB, Payload secret, SMTP, Turnstile, analytics, S3 (`ap-southeast-1`), and retention months.
 
 ## Local automation already configured
 

@@ -41,4 +41,16 @@ describe('collectLocaleStatus', () => {
     expect(s.thComplete).toBe(false)
     expect(s.empty).toBe(true)
   })
+
+  it('handles a mix of complete and EN-only fields', () => {
+    const doc = {
+      kicker: { en: 'Hi', th: 'สวัสดี' },
+      rows: [{ label: { en: 'A', th: '' } }],
+    }
+    const s = collectLocaleStatus(fields, doc)
+    expect(s.enComplete).toBe(true)
+    expect(s.thComplete).toBe(false)
+    expect(s.empty).toBe(false)
+    expect(s.missing).toEqual([{ path: 'rows[0].label', label: 'Row label', en: true, th: false }])
+  })
 })

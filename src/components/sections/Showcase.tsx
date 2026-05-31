@@ -21,17 +21,13 @@ function asNumber(v: unknown, fallback = 0): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : fallback
 }
 
+// Syntax-kind enum mirrors the CMS `kind` select (ShowcaseSurfaces codeLines block):
+// comment | keyword | string | plain. The class is derived directly from the validated
+// value so the CSS (`.code-line.comment` etc.) and the schema can never silently diverge.
+const CODE_LINE_KINDS = new Set(['comment', 'keyword', 'string', 'plain'])
+
 function codeLineClass(kind: string): string {
-  switch (kind) {
-    case 'cm':
-      return 'code-line cm'
-    case 'kw':
-      return 'code-line kw'
-    case 'st':
-      return 'code-line st'
-    default:
-      return 'code-line plain'
-  }
+  return CODE_LINE_KINDS.has(kind) ? `code-line ${kind}` : 'code-line plain'
 }
 
 /**
@@ -43,11 +39,9 @@ function Chart({ bars, active }: { bars: Array<Record<string, unknown>>; active:
   const [grown, setGrown] = useState(false)
 
   useEffect(() => {
-    if (!active) {
-      setGrown(false)
-      return
-    }
-    setGrown(false)
+    if (!active) return
+    // Grow on activation. setState happens only inside rAF (the ramp) and cleanup (the reset),
+    // never synchronously in the effect body — so no cascading renders.
     let raf2 = 0
     const raf1 = requestAnimationFrame(() => {
       raf2 = requestAnimationFrame(() => setGrown(true))
@@ -55,6 +49,7 @@ function Chart({ bars, active }: { bars: Array<Record<string, unknown>>; active:
     return () => {
       cancelAnimationFrame(raf1)
       cancelAnimationFrame(raf2)
+      setGrown(false) // reset to 0 when the panel deactivates / unmounts
     }
   }, [active])
 

@@ -10,6 +10,7 @@
 import { Fragment, type ReactNode } from 'react'
 
 import type { RichTextValue } from './content'
+import { safeHref } from './safeHref'
 
 // Lexical TextNode format bitmask.
 const IS_BOLD = 1
@@ -33,14 +34,18 @@ function rootChildren(value: RichTextValue | undefined): LexNode[] {
   return Array.isArray(root?.children) ? (root!.children as LexNode[]) : []
 }
 
-/** Wrap text in <strong>/<em>/<code>/... according to the Lexical format bitmask. */
-function formatText(text: string, format: number, key: string): ReactNode {
+/**
+ * Wrap text in <strong>/<em>/<code>/... according to the Lexical format bitmask.
+ * Each wrapper is a single (non-array) child of the next, so no `key` is needed — the
+ * list-level key is supplied once by the caller's <Fragment>.
+ */
+function formatText(text: string, format: number): ReactNode {
   let node: ReactNode = text
-  if (format & IS_CODE) node = <code key={`${key}-c`}>{node}</code>
-  if (format & IS_BOLD) node = <strong key={`${key}-b`}>{node}</strong>
-  if (format & IS_ITALIC) node = <em key={`${key}-i`}>{node}</em>
-  if (format & IS_UNDERLINE) node = <u key={`${key}-u`}>{node}</u>
-  if (format & IS_STRIKETHROUGH) node = <s key={`${key}-s`}>{node}</s>
+  if (format & IS_CODE) node = <code>{node}</code>
+  if (format & IS_BOLD) node = <strong>{node}</strong>
+  if (format & IS_ITALIC) node = <em>{node}</em>
+  if (format & IS_UNDERLINE) node = <u>{node}</u>
+  if (format & IS_STRIKETHROUGH) node = <s>{node}</s>
   return node
 }
 
@@ -52,10 +57,11 @@ function renderInline(children: LexNode[] | undefined, keyPrefix: string): React
     if (child.type === 'linebreak') return <br key={key} />
     if (typeof child.text === 'string') {
       const format = typeof child.format === 'number' ? child.format : 0
-      return <Fragment key={key}>{formatText(child.text, format, key)}</Fragment>
+      return <Fragment key={key}>{formatText(child.text, format)}</Fragment>
     }
     if (child.type === 'link') {
-      const href = child.fields?.url ?? child.url ?? '#'
+      // href is CMS-authored — scheme-allow-list it to block javascript:/data: XSS.
+      const href = safeHref(child.fields?.url ?? child.url)
       const external = child.fields?.newTab
       return (
         <a

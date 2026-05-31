@@ -10,3 +10,8 @@ src/payload-types.ts
 src/app/(payload)/admin/importMap.js
 docs/Frist Pilot-handoff
 *.md
+
+# Tool-managed scaffolding & runtime state (generated, not hand-authored source)
+.specify/
+.remember/
+.claude/

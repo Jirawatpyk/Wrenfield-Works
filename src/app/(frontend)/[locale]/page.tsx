@@ -15,7 +15,7 @@ import { Stats } from '@/components/sections/Stats'
 import { Testimonial } from '@/components/sections/Testimonial'
 import { Work } from '@/components/sections/Work'
 import { getSeo, getSiteContent, headingByNumber } from '@/lib/content'
-import { isLocale, normalizeLocale, type Locale } from '@/lib/i18n'
+import { isLocale, type Locale } from '@/lib/i18n'
 
 /**
  * Public home page (T042–T045) — composes every section from published CMS content for the
@@ -31,7 +31,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>
 }): Promise<Metadata> {
   const { locale } = await params
-  const seo = await getSeo(normalizeLocale(locale))
+  // Mirror the page's own guard: an unsupported segment 404s, so it must not emit real
+  // (English-fallback) SEO/OpenGraph metadata — and og:locale must never echo it.
+  if (!isLocale(locale)) return {}
+  const seo = await getSeo(locale)
   if (!seo) return {}
   const og = seo.ogImage ? { images: [{ url: seo.ogImage }] } : {}
   return {
@@ -60,7 +63,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       {c.nav ? <Nav nav={c.nav} /> : null}
       <main id="main">
         {c.hero ? <Hero hero={c.hero} /> : null}
-        {c.marquee ? <Marquee marquee={c.marquee} /> : null}
+        {c.marquee ? <Marquee marquee={c.marquee} locale={locale} /> : null}
         {c.stats ? <Stats stats={c.stats} /> : null}
         {c.capabilities ? (
           <Capabilities
@@ -83,7 +86,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         {c.testimonial ? <Testimonial testimonial={c.testimonial} /> : null}
         {c.cta ? <CTA cta={c.cta} /> : null}
       </main>
-      {c.footer && c.nav ? <Footer footer={c.footer} nav={c.nav} locale={locale} /> : null}
+      {c.footer ? <Footer footer={c.footer} locale={locale} /> : null}
     </>
   )
 }

@@ -1341,28 +1341,34 @@ footer {
   }
 }
 
-/* nav: tighten links, drop language toggle */
+/* nav: tighten link spacing on medium screens. The language toggle STAYS — bilingual
+   switching is core (FR-002/FR-003), not optional chrome. */
 @media (max-width: 1080px) {
   .nav-links {
     gap: 24px;
   }
-  .lang-tog {
-    display: none;
-  }
 }
 
-/* nav: hide section links */
+/* nav: hide the section anchor links (still reachable by scrolling). MUST use the child
+   combinator `.nav-links > a.lk` — the EN/TH pills are `.lang-tog .lk` (descendants of
+   .nav-links), so the old `.nav-links .lk` ALSO hid the language switcher, making bilingual
+   switching impossible on mobile (the regression this fixes). */
 @media (max-width: 920px) {
-  .nav-links .lk {
+  .nav-links > a.lk {
     display: none;
   }
 }
 
-/* nav: brand + CTA only */
-@media (max-width: 900px) {
-  .nav-links .lk,
-  .lang-tog {
+/* phones: drop ONLY the solid nav CTA to keep the row from overflowing — it remains available
+   in the hero actions and the contact section. `.btn.solid` targets the CTA specifically; the
+   ThemeToggle is a plain `.btn` (no `.solid`) and MUST stay, alongside the brand + language
+   toggle, so theme switching and bilingual switching both work on mobile. */
+@media (max-width: 720px) {
+  .nav-links > .btn.solid {
     display: none;
+  }
+  .nav-links {
+    gap: 16px;
   }
 }
 

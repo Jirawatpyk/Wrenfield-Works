@@ -4,8 +4,13 @@
  * Server component. Column headings ("Studio"/"Connect") are localized constants because the
  * Footer global has no field for them yet.
  * TODO(Phase 4): move column headings into Footer global schema.
+ *
+ * Renders only on `footer` content (it uses no other global), so a partial degradation of an
+ * unrelated global never drops the contentinfo landmark. Link hrefs are CMS-authored and pass
+ * through `safeHref` (scheme allow-list) to block javascript:/data: stored-XSS.
  */
-import type { FooterVM, NavVM } from '@/lib/content'
+import type { FooterVM } from '@/lib/content'
+import { safeHref } from '@/lib/safeHref'
 
 /** Brand mark — full 5-circle geometry (4 filled endpoints + hollow centre), aria-hidden. */
 const MARK = (
@@ -36,18 +41,7 @@ const MARK = (
 const STUDIO = { en: 'Studio', th: 'สตูดิโอ' }
 const CONNECT = { en: 'Connect', th: 'ติดต่อ' }
 
-export function Footer({
-  footer,
-  nav,
-  locale,
-}: {
-  footer: FooterVM
-  nav: NavVM
-  locale: 'en' | 'th'
-}) {
-  // nav labels are reused for the studio column links in the prototype.
-  void nav
-
+export function Footer({ footer, locale }: { footer: FooterVM; locale: 'en' | 'th' }) {
   return (
     <footer data-testid="site-footer">
       <div className="wrap">
@@ -64,7 +58,7 @@ export function Footer({
           <div className="foot-col">
             <h5>{locale === 'th' ? STUDIO.th : STUDIO.en}</h5>
             {footer.studioLinks.map((link, i) => (
-              <a key={`studio-${i}`} href={link.anchor}>
+              <a key={`studio-${i}`} href={safeHref(link.anchor)}>
                 {link.label}
               </a>
             ))}
@@ -72,7 +66,7 @@ export function Footer({
           <div className="foot-col">
             <h5>{locale === 'th' ? CONNECT.th : CONNECT.en}</h5>
             {footer.connectLinks.map((link, i) => (
-              <a key={`connect-${i}`} href={link.url}>
+              <a key={`connect-${i}`} href={safeHref(link.url)}>
                 {link.label}
               </a>
             ))}

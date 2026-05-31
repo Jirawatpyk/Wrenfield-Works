@@ -1,5 +1,6 @@
 import type { CtaVM } from '@/lib/content'
 import { RichInline } from '@/lib/richtext'
+import { safeHref } from '@/lib/safeHref'
 import { Button } from '@/components/primitives/Button'
 import { Reveal } from '@/components/primitives/Reveal'
 import { LatticeCanvas } from '@/components/primitives/LatticeCanvas'
@@ -11,6 +12,9 @@ import { LatticeCanvas } from '@/components/primitives/LatticeCanvas'
  *
  * Kicker/heading/body/CTA/links use the <Reveal> client primitive (scroll-into-view fade);
  * a bare `reveal` class would stay at opacity:0 because nothing adds `.in`.
+ *
+ * Social link hrefs are CMS-authored, so they pass through `safeHref` (scheme allow-list)
+ * to prevent a stored `javascript:`/`data:` URI from becoming an XSS vector.
  */
 export function CTA({ cta }: { cta: CtaVM }) {
   return (
@@ -34,7 +38,7 @@ export function CTA({ cta }: { cta: CtaVM }) {
         </Reveal>
         <Reveal className="links">
           {cta.socialLinks.map((link, i) => (
-            <a key={`${link.url}-${i}`} className="ghost" href={link.url}>
+            <a key={`${link.url}-${i}`} className="ghost" href={safeHref(link.url)}>
               {link.label}
             </a>
           ))}

@@ -16,12 +16,7 @@ export default defineConfig({
       provider: 'v8',
       reportsDirectory: './coverage',
       // Constitution test gate: ≥80% on business-logic modules.
-      include: [
-        'src/lib/**',
-        'src/collections/**',
-        'src/globals/**',
-        'src/access/**',
-      ],
+      include: ['src/lib/**', 'src/collections/**', 'src/globals/**', 'src/access/**'],
       thresholds: {
         statements: 80,
         branches: 80,

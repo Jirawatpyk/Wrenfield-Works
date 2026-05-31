@@ -7,15 +7,20 @@
  * scrolling animation when the section carries `data-paused="true"`. Two identical tracks
  * are rendered for the seamless loop; the duplicate is `aria-hidden` so assistive tech only
  * announces the logos once. The toggle is a real <button> (keyboard accessible) whose
- * accessible label flips between pause/resume.
+ * accessible label flips between pause/resume — localized for EN/TH (FR-014).
  */
 import { useState } from 'react'
 
 import type { MarqueeVM } from '@/lib/content'
+import type { Locale } from '@/lib/i18n'
 
-export function Marquee({ marquee }: { marquee: MarqueeVM }) {
+const PAUSE_LABEL = { en: 'Pause logo marquee', th: 'หยุดแถบโลโก้ชั่วคราว' }
+const RESUME_LABEL = { en: 'Resume logo marquee', th: 'เล่นแถบโลโก้ต่อ' }
+
+export function Marquee({ marquee, locale }: { marquee: MarqueeVM; locale: Locale }) {
   const [paused, setPaused] = useState(false)
   const togglePaused = () => setPaused((p) => !p)
+  const label = paused ? RESUME_LABEL[locale] : PAUSE_LABEL[locale]
 
   return (
     <section
@@ -29,10 +34,10 @@ export function Marquee({ marquee }: { marquee: MarqueeVM }) {
         data-testid="marquee-toggle"
         className="marquee-toggle"
         aria-pressed={paused}
-        aria-label={paused ? 'Resume logo marquee' : 'Pause logo marquee'}
+        aria-label={label}
         onClick={togglePaused}
       >
-        {paused ? 'Resume logo marquee' : 'Pause logo marquee'}
+        {label}
       </button>
       <div className="marquee">
         <ul className="marquee-track">

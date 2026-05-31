@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
-import { LOCALES, type Locale, normalizeLocale } from '@/lib/i18n'
+import { LOCALE_COOKIE, LOCALES, type Locale, normalizeLocale } from '@/lib/i18n'
 
 const LABELS: Record<Locale, { short: string; accessible: string }> = {
   en: { short: 'EN', accessible: 'English' },
@@ -28,15 +28,21 @@ function swapLocaleInPath(pathname: string, target: Locale): string {
   return `/${target}${rest}`
 }
 
+/**
+ * Persist the chosen locale client-side so a later bare-root visit ("/") resolves to it
+ * (Ambiguity #1, FR-003). The `<Link>` is a soft navigation, on which the proxy's Set-Cookie
+ * is not reliably committed by the browser, so we write it here too. Defined at module scope
+ * (not in the component) so the React Compiler does not flag the `document.cookie` write as a
+ * render-time global mutation.
+ */
+function persistLocale(locale: Locale) {
+  document.cookie = `${LOCALE_COOKIE}=${locale};path=/;max-age=31536000;samesite=lax`
+}
+
 export function LangToggle() {
   const pathname = usePathname() ?? '/'
   const params = useParams<{ locale?: string }>()
   const current = normalizeLocale(params?.locale ?? null)
-
-  function persistLocale(locale: Locale) {
-    // Hint cookie so a later bare-root visit remembers the choice (Ambiguity #1).
-    document.cookie = `wf-locale=${locale};path=/;max-age=31536000;samesite=lax`
-  }
 
   return (
     <div className="lang-tog" role="group" aria-label="Language">

@@ -1,15 +1,18 @@
 'use client'
 
-import { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useSyncExternalStore } from 'react'
 import type { ReactNode } from 'react'
 
 import { DEFAULT_THEME, THEME_STORAGE_KEY, isTheme, type Theme } from '@/lib/theme'
 
 /**
- * Client theme controller (T018). Reads/writes the persisted theme, toggles the
- * `paper` class on <body>, and exposes a hook the ThemeToggle consumes. The
- * pre-paint boot script (src/lib/theme.ts) sets the initial class to avoid FOUC;
- * this provider keeps React state in sync for the toggle's accessible label.
+ * Client theme controller (T018). The persisted theme lives in an EXTERNAL store
+ * (localStorage + the `paper` class the pre-paint boot script already applied to <body>),
+ * so it is read via `useSyncExternalStore` rather than `useState` + a mount effect — which
+ * keeps SSR/hydration correct (server snapshot = DEFAULT_THEME, no flash because the boot
+ * script set the class first) and avoids a synchronous setState in an effect. Writing the
+ * theme updates localStorage + the body class and notifies subscribers; the `storage` event
+ * keeps other tabs in sync.
  */
 type ThemeContextValue = {
   theme: Theme
@@ -19,32 +22,60 @@ type ThemeContextValue = {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
-export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME)
+const subscribers = new Set<() => void>()
 
-  // Sync from what the boot script already applied (and storage) on mount.
-  useEffect(() => {
+function notify() {
+  for (const cb of subscribers) cb()
+}
+
+function subscribe(cb: () => void): () => void {
+  subscribers.add(cb)
+  window.addEventListener('storage', cb)
+  return () => {
+    subscribers.delete(cb)
+    window.removeEventListener('storage', cb)
+  }
+}
+
+/** Client snapshot: persisted choice wins, else whatever the boot script applied to <body>. */
+function getThemeSnapshot(): Theme {
+  try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY)
-    if (isTheme(stored)) setThemeState(stored)
-    else if (document.body.classList.contains('paper')) setThemeState('paper')
-  }, [])
+    if (isTheme(stored)) return stored
+  } catch {
+    /* storage unavailable — fall through to the body class */
+  }
+  return document.body.classList.contains('paper') ? 'paper' : DEFAULT_THEME
+}
 
-  const apply = useCallback((next: Theme) => {
-    setThemeState(next)
-    document.body.classList.toggle('paper', next === 'paper')
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, next)
-    } catch {
-      /* storage unavailable — theme still applies for this session */
-    }
+/** Server snapshot: the boot script hasn't run yet, so render the default. */
+function getServerThemeSnapshot(): Theme {
+  return DEFAULT_THEME
+}
+
+function persistTheme(next: Theme): void {
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, next)
+  } catch {
+    /* storage unavailable — theme still applies for this session */
+  }
+  document.body.classList.toggle('paper', next === 'paper')
+  notify()
+}
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const theme = useSyncExternalStore(subscribe, getThemeSnapshot, getServerThemeSnapshot)
+
+  const setTheme = useCallback((next: Theme) => {
+    persistTheme(next)
   }, [])
 
   const toggleTheme = useCallback(() => {
-    apply(theme === 'dark' ? 'paper' : 'dark')
-  }, [theme, apply])
+    persistTheme(theme === 'dark' ? 'paper' : 'dark')
+  }, [theme])
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme: apply }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   )

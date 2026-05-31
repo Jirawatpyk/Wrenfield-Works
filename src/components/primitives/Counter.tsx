@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 
+import { decimalPlaces, formatCount } from '@/lib/format'
+
 const DURATION_MS = 1400
 
 /** ease-out cubic — design-extract §4.6: 1 - (1 - p)^3 */
@@ -9,23 +11,20 @@ function easeOut(p: number): number {
   return 1 - Math.pow(1 - p, 3)
 }
 
-function format(n: number, decimals: number): string {
-  return decimals > 0 ? n.toFixed(decimals) : Math.round(n).toLocaleString('en-US')
-}
-
 /**
  * Counter — client primitive (design-extract §4.6 animated counters).
  *
- * The initial server-rendered output is the FINAL formatted value so crawlers
- * and no-JS visitors always see the real number (and there is no layout shift).
- * After mount:
- *   - If `motion-off` (reduced motion) the final value is kept as-is.
- *   - Otherwise, when the element scrolls into view (IntersectionObserver,
- *     threshold .6) it animates 0 → value over 1400ms using the §4.6 ease-out,
- *     formatting each frame with `toFixed(decimals)` when decimals > 0, else
- *     `Math.round(n).toLocaleString('en-US')`.
+ * The settled value is DERIVED from props (`final`), so the server-rendered output and any
+ * later prop change always show the real number with no layout shift, and crawlers/no-JS
+ * visitors see it too. State holds only the transient in-flight number during the count-up
+ * (`animating`), which is null at rest — so the effect never calls setState synchronously
+ * (avoids cascading renders): every update happens inside the IntersectionObserver callback,
+ * an rAF step, or cleanup.
  *
- * rAF and the observer are torn down on unmount.
+ * Values render **as authored** (FR-011c): no locale thousands-grouping, and the authored
+ * decimal precision is preserved (an explicit `decimals` prop wins, else it is inferred).
+ * Under reduced motion (`motion-off`) the count-up is skipped entirely. rAF + observer are
+ * torn down on unmount.
  */
 export function Counter({
   value,
@@ -38,19 +37,17 @@ export function Counter({
   decimals?: number
   className?: string
 }) {
-  // Start (and SSR) at the final value.
-  const [display, setDisplay] = useState<string>(() => format(value, decimals))
+  const fractionDigits = decimals > 0 ? decimals : decimalPlaces(value)
+  const final = formatCount(value, fractionDigits)
+  // null = settled (render `final`); a string = the current count-up frame.
+  const [animating, setAnimating] = useState<string | null>(null)
   const ref = useRef<HTMLSpanElement | null>(null)
 
   useEffect(() => {
     const el = ref.current
     if (!el) return
-
-    // Reduced motion → keep the final value, no animation.
-    if (document.body.classList.contains('motion-off')) {
-      setDisplay(format(value, decimals))
-      return
-    }
+    // Reduced motion → no count-up; the derived `final` is already correct.
+    if (document.body.classList.contains('motion-off')) return
 
     let rafId = 0
     let observer: IntersectionObserver | null = null
@@ -61,20 +58,18 @@ export function Counter({
       const step = (now: number) => {
         if (cancelled) return
         const p = Math.min(1, (now - start) / DURATION_MS)
-        const current = easeOut(p) * value
-        setDisplay(format(current, decimals))
         if (p < 1) {
+          setAnimating(formatCount(easeOut(p) * value, fractionDigits))
           rafId = requestAnimationFrame(step)
         } else {
-          setDisplay(format(value, decimals))
+          setAnimating(null) // settle back to the derived final value
         }
       }
       rafId = requestAnimationFrame(step)
     }
 
     const begin = () => {
-      // Reset to 0 then ramp to the target.
-      setDisplay(format(0, decimals))
+      setAnimating(formatCount(0, fractionDigits)) // reset to 0, then ramp
       animate()
     }
 
@@ -100,13 +95,11 @@ export function Counter({
       if (rafId) cancelAnimationFrame(rafId)
       observer?.disconnect()
     }
-    // value/decimals are stable per render of a given stat.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, decimals])
+  }, [value, fractionDigits])
 
   return (
-    <span className={['v', className].filter(Boolean).join(' ')}>
-      <span>{display}</span>
+    <span ref={ref} className={['v', className].filter(Boolean).join(' ')}>
+      <span>{animating ?? final}</span>
       {unit ? <span className="u">{unit}</span> : null}
     </span>
   )

@@ -377,12 +377,22 @@ export async function getSiteContent(locale: Locale): Promise<SiteContent> {
   }
 }
 
-/** Look up a section heading by its mono number ('01'..'04'); null if absent. */
+/**
+ * Look up a section heading by its mono number ('01'..'04'); null if absent.
+ *
+ * The CMS `number` field is editor-controlled free text. Prefer an exact match, then fall
+ * back to a numeric-equivalent match so a non-canonical authoring ('1' for '01') still
+ * resolves instead of silently dropping the entire section header.
+ */
 export function headingByNumber(
   headings: SectionHeadingVM[],
   number: string,
 ): SectionHeadingVM | null {
-  return headings.find((h) => h.number === number) ?? null
+  const exact = headings.find((h) => h.number === number)
+  if (exact) return exact
+  const target = Number.parseInt(number, 10)
+  if (Number.isNaN(target)) return null
+  return headings.find((h) => Number.parseInt(h.number, 10) === target) ?? null
 }
 
 /**
@@ -406,7 +416,6 @@ export async function getSeo(locale: Locale): Promise<SeoVM | null> {
 // Global mappers (pure; exercised end-to-end by the public page / E2E)
 // ---------------------------------------------------------------------------
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 function mapHero(d: any): HeroVM {
   return {
     kicker: pick(d.kicker),
@@ -479,4 +488,3 @@ function mapSeo(d: any): SeoVM {
   const ogImage = og && typeof og === 'object' && typeof og.url === 'string' ? og.url : null
   return { title: pick(d.title), description: pick(d.description), ogImage }
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */

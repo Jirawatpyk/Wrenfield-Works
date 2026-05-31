@@ -1,6 +1,8 @@
 import type { CollectionBeforeValidateHook, Field, GlobalBeforeValidateHook } from 'payload'
 import { APIError } from 'payload'
 
+import { isBlank, walkLocalizedLeaves, VALUE_FIELD_TYPES, type AnyRecord } from './localeFields'
+
 /**
  * Publish-completeness gate (FR-014, admin-auth contract). A document may not
  * reach `published` status while any localized field is missing its EN or TH
@@ -15,36 +17,12 @@ import { APIError } from 'payload'
  *
  * The incoming write (flat, active-locale) is overlaid onto the active side of
  * those maps so that clearing a value and publishing in the same save is caught.
+ *
+ * `isBlank`, `VALUE_FIELD_TYPES`, and the schema walk live in `./localeFields`
+ * so the readiness badge and the bilingual error share one definition (T1).
  */
 
-type AnyRecord = Record<string, unknown>
 type LocaleMap = { en?: unknown; th?: unknown }
-
-const VALUE_FIELD_TYPES = new Set([
-  'text',
-  'textarea',
-  'richText',
-  'email',
-  'number',
-  'select',
-  'code',
-  'date',
-])
-
-function isBlank(value: unknown): boolean {
-  if (value === null || value === undefined) return true
-  if (typeof value === 'string') return value.trim() === ''
-  if (Array.isArray(value)) return value.length === 0
-  if (typeof value === 'object') {
-    // Lexical richText: empty when no text-bearing or upload children exist.
-    const root = (value as AnyRecord).root as AnyRecord | undefined
-    if (root && Array.isArray(root.children)) {
-      const serialized = JSON.stringify(root.children)
-      return !/"text":"\s*\S/.test(serialized) && !serialized.includes('"type":"upload"')
-    }
-  }
-  return false
-}
 
 /** A localized leaf under `locale: 'all'` is `{ en, th }`; incomplete if either is blank. */
 function localeMapIncomplete(value: unknown): boolean {
@@ -58,65 +36,9 @@ function localeMapIncomplete(value: unknown): boolean {
 /** Walk the schema over a `locale: 'all'`-shaped doc, collecting incomplete localized leaves. */
 function collectMissing(fields: Field[], data: AnyRecord, prefix: string): string[] {
   const missing: string[] = []
-
-  for (const field of fields) {
-    if (field.type === 'ui') continue
-
-    if ((field.type === 'row' || field.type === 'collapsible') && 'fields' in field) {
-      missing.push(...collectMissing(field.fields, data, prefix))
-      continue
-    }
-
-    if (field.type === 'tabs' && 'tabs' in field) {
-      for (const tab of field.tabs) {
-        if ('name' in tab && tab.name) {
-          missing.push(
-            ...collectMissing(
-              tab.fields,
-              (data?.[tab.name] as AnyRecord) ?? {},
-              `${prefix}${tab.name}.`,
-            ),
-          )
-        } else {
-          missing.push(...collectMissing(tab.fields, data, prefix))
-        }
-      }
-      continue
-    }
-
-    if (!('name' in field) || !field.name) continue
-    const path = `${prefix}${field.name}`
-    const localized = 'localized' in field && field.localized === true
-    const value = data?.[field.name]
-
-    if (VALUE_FIELD_TYPES.has(field.type)) {
-      if (localized && localeMapIncomplete(value)) missing.push(path)
-      continue
-    }
-
-    if (field.type === 'group' && 'fields' in field) {
-      missing.push(...collectMissing(field.fields, (value as AnyRecord) ?? {}, `${path}.`))
-      continue
-    }
-
-    if (field.type === 'array' && 'fields' in field) {
-      const rows = Array.isArray(value) ? (value as AnyRecord[]) : []
-      rows.forEach((row, i) => {
-        missing.push(...collectMissing(field.fields, row ?? {}, `${path}[${i}].`))
-      })
-      continue
-    }
-
-    if (field.type === 'blocks' && 'blocks' in field) {
-      const rows = Array.isArray(value) ? (value as AnyRecord[]) : []
-      rows.forEach((row, i) => {
-        const block = field.blocks.find((b) => b.slug === row?.blockType)
-        if (block) missing.push(...collectMissing(block.fields, row ?? {}, `${path}[${i}].`))
-      })
-      continue
-    }
-  }
-
+  walkLocalizedLeaves(fields, data, prefix, (path, value) => {
+    if (localeMapIncomplete(value)) missing.push(path)
+  })
   return missing
 }
 

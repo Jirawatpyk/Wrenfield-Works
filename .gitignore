@@ -59,3 +59,9 @@ Thumbs.db
 
 # Playwright MCP inspection snapshots (transient)
 .playwright-mcp/
+
+# Local Claude Code state (agent memory, ad-hoc agent defs, local settings).
+# Already-tracked files under .claude/ (hooks, skills, configured review agents,
+# settings.json) stay tracked — this only stops NEW untracked items from appearing.
+.claude/*
+

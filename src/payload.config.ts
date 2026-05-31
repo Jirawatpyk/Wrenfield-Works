@@ -91,6 +91,17 @@ export default buildConfig({
   admin: {
     user: 'users',
     // The back-office editing UI must also meet WCAG 2.1 AA (FR-007).
+    components: {
+      graphics: {
+        Logo: '/components/admin/BrandLogo#BrandLogo',
+        Icon: '/components/admin/BrandIcon#BrandIcon',
+      },
+    },
+    meta: {
+      titleSuffix: ' — Wrenfield Works',
+      description: 'Wrenfield Works content management',
+      icons: [{ rel: 'icon', type: 'image/svg+xml', url: '/favicon.svg' }],
+    },
   },
 
   // EN default + TH; fallback lets a missing locale value fall back to the other.

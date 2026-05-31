@@ -21,7 +21,7 @@ import { childLogger } from './logging'
 const log = childLogger('revalidate')
 
 /** The Next invariant thrown when revalidatePath runs with no request store (seed/CLI/tests). */
-function isNoStoreInvariant(err: unknown): boolean {
+export function isNoStoreInvariant(err: unknown): boolean {
   const code = (err as { __NEXT_ERROR_CODE?: string } | null)?.__NEXT_ERROR_CODE
   if (code === 'E263') return true
   const msg = err instanceof Error ? err.message : String(err)

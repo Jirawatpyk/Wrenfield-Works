@@ -302,6 +302,7 @@ export function mapShowcaseSurfaces(
 // Orchestrator (Payload Local API I/O) — lazy imports keep the pure layer test-light
 // ---------------------------------------------------------------------------
 
+/* c8 ignore start -- Payload Local API I/O orchestration; covered by integration + e2e, not unit-counted */
 async function getClient() {
   const { getPayload } = await import('payload')
   const config = (await import('@payload-config')).default
@@ -391,6 +392,7 @@ export async function getSiteContent(
     seo: seoDoc ? mapSeo(seoDoc) : null,
   }
 }
+/* c8 ignore stop */
 
 /**
  * Look up a section heading by its mono number ('01'..'04'); null if absent.
@@ -414,6 +416,7 @@ export function headingByNumber(
  * Lightweight SEO-only read for `generateMetadata` (T043) — avoids a full site fetch
  * just to build the per-locale <head>. Degrades to null on any failure.
  */
+/* c8 ignore start -- Payload Local API I/O; covered by integration + e2e, not unit-counted */
 export async function getSeo(locale: Locale): Promise<SeoVM | null> {
   return safeSection('seo-metadata', async () => {
     const payload = await getClient()
@@ -426,12 +429,13 @@ export async function getSeo(locale: Locale): Promise<SeoVM | null> {
     return mapSeo(doc)
   })
 }
+/* c8 ignore stop */
 
 // ---------------------------------------------------------------------------
 // Global mappers (pure; exercised end-to-end by the public page / E2E)
 // ---------------------------------------------------------------------------
 
-function mapHero(d: any): HeroVM {
+export function mapHero(d: any): HeroVM {
   return {
     kicker: pick(d.kicker),
     headline: d.headline ?? null,
@@ -442,7 +446,7 @@ function mapHero(d: any): HeroVM {
   }
 }
 
-function mapNav(d: any): NavVM {
+export function mapNav(d: any): NavVM {
   return {
     capabilities: pick(d.capabilities),
     platform: pick(d.platform),
@@ -452,11 +456,11 @@ function mapNav(d: any): NavVM {
   }
 }
 
-function mapMarquee(d: any, logos: ClientLogoVM[]): MarqueeVM {
+export function mapMarquee(d: any, logos: ClientLogoVM[]): MarqueeVM {
   return { heading: pick(d.heading), logos }
 }
 
-function mapSectionHeadings(d: any): SectionHeadingVM[] {
+export function mapSectionHeadings(d: any): SectionHeadingVM[] {
   const rows: any[] = d?.headings ?? []
   return rows.map((row) => ({
     number: pick(row.number),
@@ -465,11 +469,11 @@ function mapSectionHeadings(d: any): SectionHeadingVM[] {
   }))
 }
 
-function mapTestimonial(d: any): TestimonialVM {
+export function mapTestimonial(d: any): TestimonialVM {
   return { quote: d.quote ?? null, attribution: d.attribution ?? null }
 }
 
-function mapCta(d: any): CtaVM {
+export function mapCta(d: any): CtaVM {
   return {
     kicker: pick(d.kicker),
     heading: d.heading ?? null,
@@ -483,7 +487,7 @@ function mapCta(d: any): CtaVM {
   }
 }
 
-function mapFooter(d: any): FooterVM {
+export function mapFooter(d: any): FooterVM {
   return {
     blurb: pick(d.blurb),
     studioLinks: (d.studioLinks ?? []).map((l: any) => ({
@@ -498,7 +502,7 @@ function mapFooter(d: any): FooterVM {
   }
 }
 
-function mapSeo(d: any): SeoVM {
+export function mapSeo(d: any): SeoVM {
   const og = d?.ogImage
   const ogImage = og && typeof og === 'object' && typeof og.url === 'string' ? og.url : null
   return { title: pick(d.title), description: pick(d.description), ogImage }

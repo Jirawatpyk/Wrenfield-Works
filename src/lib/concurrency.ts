@@ -28,7 +28,7 @@ function toMs(value: unknown): number {
   return new Date(value as string).getTime()
 }
 
-function isStaleSave(incoming: unknown, stored: unknown): boolean {
+export function isStaleSave(incoming: unknown, stored: unknown): boolean {
   if (incoming == null || stored == null) return false
   const i = toMs(incoming)
   const s = toMs(stored)

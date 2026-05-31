@@ -50,7 +50,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm generate:types
-      - run: pnpm test -- --coverage
+      # Integration tests run against an ISOLATED test DB (singleton globals must not leak
+      # across files); the harness + reset script target `wrenfield_test` via TEST_DATABASE_URI.
+      - name: Create isolated integration test database
+        run: PGPASSWORD=wrenfield psql -h localhost -U wrenfield -d wrenfield -c "CREATE DATABASE wrenfield_test"
+      - name: Unit + integration (Vitest) with coverage — reset + sequential
+        env:
+          TEST_DATABASE_URI: postgres://wrenfield:wrenfield@localhost:5432/wrenfield_test
+        run: pnpm test:ci
 
   e2e:
     name: E2E + WCAG 2.1 AA (Playwright + axe)

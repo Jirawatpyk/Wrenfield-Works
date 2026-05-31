@@ -21,6 +21,7 @@
     "test:watch": "vitest",
     "test:unit": "vitest run tests/unit",
     "test:integration": "node scripts/reset-test-db.mjs && vitest run tests/integration --no-file-parallelism",
+    "test:ci": "node scripts/reset-test-db.mjs && vitest run --coverage --no-file-parallelism",
     "test:e2e": "playwright test",
     "lhci": "lhci autorun",
     "payload": "payload",

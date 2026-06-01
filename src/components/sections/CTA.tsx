@@ -2,7 +2,6 @@ import type { CtaVM } from '@/lib/content'
 import type { Locale } from '@/lib/i18n'
 import { RichInline } from '@/lib/richtext'
 import { safeHref } from '@/lib/safeHref'
-import { Button } from '@/components/primitives/Button'
 import { Reveal } from '@/components/primitives/Reveal'
 import { LatticeCanvas } from '@/components/primitives/LatticeCanvas'
 import { InquiryForm } from '@/components/sections/InquiryForm'
@@ -34,21 +33,19 @@ export function CTA({ cta, locale }: { cta: CtaVM; locale: Locale }) {
         <Reveal className="cta-form-wrap">
           <InquiryForm locale={locale} />
         </Reveal>
-        {/* Secondary contact routes alongside the form: the studio email (primary
-            magnetic button) and the "book a call" link (cta.bookCallLabel). */}
-        <Reveal className="cta">
+        {/* The form is the primary CTA. Email + "book a call" + socials are low-emphasis
+            secondary links in one centered row (cta.email / cta.bookCallLabel stay used). */}
+        <Reveal className="links">
           {cta.email ? (
-            <Button href={safeHref(`mailto:${cta.email}`)} variant="solid" magnetic>
-              {cta.email} <span className="arr">→</span>
-            </Button>
+            <a className="ghost" href={safeHref(`mailto:${cta.email}`)}>
+              {cta.email}
+            </a>
           ) : null}
           {cta.bookCallLabel ? (
-            <Button href="#" magnetic>
+            <a className="ghost" href="#">
               {cta.bookCallLabel}
-            </Button>
+            </a>
           ) : null}
-        </Reveal>
-        <Reveal className="links">
           {cta.socialLinks.map((link, i) => (
             <a key={`${link.url}-${i}`} className="ghost" href={safeHref(link.url)}>
               {link.label}

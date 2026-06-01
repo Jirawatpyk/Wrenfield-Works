@@ -1292,7 +1292,7 @@ section.blk.rule-in::before {
   border: 1px solid var(--positive);
 }
 .inquiry-form button[type='submit'] {
-  justify-self: start;
+  justify-self: center;
 }
 .inquiry-form button[disabled] {
   opacity: 0.6;

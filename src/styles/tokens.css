@@ -73,6 +73,7 @@
 
   /* tokenized literals (were hard-coded in the prototype) */
   --positive: #86b88a; /* status pills / trust dot */
+  --danger: #ff8a8a; /* form errors — ≈7:1 on --ink / --bg-2 (AA on dark, FR-007) */
   --on-accent: var(--ink); /* readable text on a brass fill */
   --lattice: var(--brass); /* lattice canvas node/line color */
   --cursor: var(--brass-lt);
@@ -109,6 +110,7 @@ body.paper {
 
   /* tokenized literals adjusted for light mode AA */
   --positive: #2f7a45;
+  --danger: #b3261e; /* form errors — ≈5.3:1 on --paper / --paper-2 (AA on paper) */
   --on-accent: #ffffff; /* white on the darkened bronze solid-button bg → ≥5:1 */
   --lattice: #9a7338;
   --cursor: var(--brass);

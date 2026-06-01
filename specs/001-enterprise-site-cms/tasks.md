@@ -156,24 +156,24 @@ consent blocked; simulated email failure doesn't lose the record; back-dated rec
 
 ### Tests for User Story 3 (write first, must fail) ⚠️
 
-- [ ] T064 [P] [US3] Contract: `POST /api/inquiries` valid → 201 + localized confirmation in `tests/integration/us3-inquiry-create.spec.ts`
-- [ ] T065 [P] [US3] Contract: 400 field errors; consent required; honeypot/rate-limit → 429 in `tests/integration/us3-inquiry-validation.spec.ts`
-- [ ] T066 [P] [US3] Integration: email send failure does NOT lose/roll back stored inquiry (FR-029) in `tests/integration/us3-email-isolation.spec.ts`
-- [ ] T067 [P] [US3] Integration: retention job permanently deletes >24mo records; monitored failure alerts/catches up (FR-027/FR-027a) in `tests/integration/us3-retention.spec.ts`
-- [ ] T068 [P] [US3] E2E: submit with consent → confirmation; appears in inbox with locale + time in `tests/e2e/us3-inquiry.spec.ts`
-- [ ] T069 [P] [US3] E2E a11y: inquiry-form errors programmatically associated + announced (FR-007d) in `tests/e2e/us3-form-a11y.spec.ts`
+- [X] T064 [P] [US3] Contract: `POST /api/inquiries` valid → 201 + localized confirmation in `tests/integration/us3-inquiry-create.spec.ts`
+- [X] T065 [P] [US3] Contract: 400 field errors; consent required; honeypot/rate-limit → 429 in `tests/integration/us3-inquiry-validation.spec.ts`
+- [X] T066 [P] [US3] Integration: email send failure does NOT lose/roll back stored inquiry (FR-029) in `tests/integration/us3-email-isolation.spec.ts`
+- [X] T067 [P] [US3] Integration: retention job permanently deletes >24mo records; monitored failure alerts/catches up (FR-027/FR-027a) in `tests/integration/us3-retention.spec.ts`
+- [X] T068 [P] [US3] E2E: submit with consent → confirmation; appears in inbox with locale + time in `tests/e2e/us3-inquiry.spec.ts`
+- [X] T069 [P] [US3] E2E a11y: inquiry-form errors programmatically associated + announced (FR-007d) in `tests/e2e/us3-form-a11y.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T070 [US3] `Inquiries` collection (consent, consentAt, submittedAt, expiresAt, status; create=public, read/update/delete=staff) in `src/collections/Inquiries.ts`
-- [ ] T071 [P] [US3] Inquiry validation schema (Zod) in `src/lib/validation/inquiry.ts`
-- [ ] T072 [US3] `POST /api/inquiries` route: validate, spam (challenge + honeypot + rate-limit 5/IP/hr), persist, set `expiresAt = +24mo` (inquiry-api contract) in `src/app/api/inquiries/route.ts`
-- [ ] T073 [US3] Inquiry form UI: consent checkbox + privacy-notice link, localized errors, loading state (FR-026, FR-005a, FR-007d) in `src/components/sections/InquiryForm.tsx`
-- [ ] T074 [US3] Email notification on create — best-effort, failure-isolated, logged (FR-029) in `src/lib/email.ts`
-- [ ] T075 [US3] Back-office inbox (name/email/message/locale/time/status) + delete-on-request (FR-024, FR-028)
-- [ ] T076 [US3] Retention job: daily, permanently delete >24mo, monitored + alert + catch-up (FR-027/FR-027a) in `src/lib/retention.ts`
-- [ ] T077 [US3] In-region (Singapore) storage/processing config + enforce TLS (FR-030)
-- [ ] T078 [US3] Cookieless analytics: pageviews + `inquiry_submitted` conversion, no cookie banner (FR-011b) in `src/lib/analytics.ts`
+- [X] T070 [US3] `Inquiries` collection (consent, consentAt, submittedAt, expiresAt, status; create=public, read/update/delete=staff) in `src/collections/Inquiries.ts` — create=`denyAll` (public create only via the validated route w/ `overrideAccess`); no drafts/versions (PDPA permanent-delete); `submittedAt`=Payload `createdAt`; `expiresAt`/`status` indexed
+- [X] T071 [P] [US3] Inquiry validation schema (Zod) in `src/lib/validation/inquiry.ts` — localized field errors (FR-023) + route response copy
+- [X] T072 [US3] `POST /api/inquiries` route: validate, spam (challenge + honeypot + rate-limit 5/IP/hr), persist, set `expiresAt = +24mo` (inquiry-api contract) in `src/app/api/inquiries/route.ts` (+ `src/lib/rateLimit.ts`, `src/lib/turnstile.ts` fail-closed)
+- [X] T073 [US3] Inquiry form UI: consent checkbox + privacy-notice link, localized errors, loading state (FR-026, FR-005a, FR-007d) in `src/components/sections/InquiryForm.tsx` — replaces the design's `mailto:` in `CTA.tsx`; + bilingual privacy page `src/app/(frontend)/[locale]/privacy/page.tsx`
+- [X] T074 [US3] Email notification on create — best-effort, failure-isolated, logged (FR-029) in `src/lib/email.ts` (pure builder HTML-escapes + strips CR/LF; wired as Inquiries `afterChange`)
+- [X] T075 [US3] Back-office inbox (name/email/message/locale/time/status) + delete-on-request (FR-024, FR-028) — `Inquiries` admin group "Inbox", `-createdAt` sort, readOnly submitted fields, built-in delete
+- [X] T076 [US3] Retention job: daily, permanently delete >24mo, monitored + alert + catch-up (FR-027/FR-027a) in `src/lib/retention.ts` + runnable entry `src/jobs/retention.ts` (`pnpm retention`)
+- [X] T077 [US3] In-region (Singapore) storage/processing config + enforce TLS (FR-030) — conditional S3 media storage (`ap-southeast-1`) in `payload.config.ts`; HSTS + security headers in `next.config.mjs`; inquiries reside in the Singapore Postgres via `DATABASE_URI`
+- [X] T078 [US3] Cookieless analytics: pageviews + `inquiry_submitted` conversion, no cookie banner (FR-011b) in `src/lib/analytics.ts` + `src/components/layout/Analytics.tsx` (injected only when configured) + conversion emit in the form
 
 **Checkpoint**: All three stories independently functional.
 

@@ -3,6 +3,7 @@ import { fileURLToPath } from 'url'
 
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
 import { th } from '@payloadcms/translations/languages/th'
 import { buildConfig } from 'payload'
@@ -23,6 +24,7 @@ assertPreviewSecret()
 import { Capabilities } from './collections/Capabilities'
 import { CaseStudies } from './collections/CaseStudies'
 import { ClientLogos } from './collections/ClientLogos'
+import { Inquiries } from './collections/Inquiries'
 import { Media } from './collections/Media'
 import { ProcessSteps } from './collections/ProcessSteps'
 import { ShowcaseSurfaces } from './collections/ShowcaseSurfaces'
@@ -39,6 +41,32 @@ import { Testimonial } from './globals/Testimonial'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+/**
+ * In-region (Singapore) object storage for media / OG images (T077, FR-030). Enabled
+ * ONLY when an S3 bucket is configured; otherwise media falls back to Payload's local
+ * disk upload (dev/test) so neither needs cloud credentials. Region defaults to
+ * `ap-southeast-1` for PDPA data residency.
+ */
+const storagePlugins = process.env.S3_BUCKET
+  ? [
+      s3Storage({
+        collections: { media: true },
+        bucket: process.env.S3_BUCKET,
+        config: {
+          region: process.env.S3_REGION || 'ap-southeast-1',
+          credentials: {
+            accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+          },
+          // Custom S3-compatible endpoint (e.g. self-hosted MinIO) uses path-style URLs.
+          ...(process.env.S3_ENDPOINT
+            ? { endpoint: process.env.S3_ENDPOINT, forcePathStyle: true }
+            : {}),
+        },
+      }),
+    ]
+  : []
 
 /**
  * Per-document EN/TH status banner (T10). A presentation-only `ui` field rendered
@@ -182,11 +210,13 @@ export default buildConfig({
 
   editor: lexicalEditor(),
 
-  // Ordered, repeatable content + auth + media (data-model.md). Inquiries added in US3 (T070).
-  // Content collections carry the US2 cross-cutting wiring; Users/Media do not.
+  // Ordered, repeatable content + auth + media (data-model.md).
+  // Content collections carry the US2 cross-cutting wiring; Users/Media/Inquiries do not
+  // (Inquiries is single-locale personal data, not bilingual published content — US3, T070).
   collections: [
     Users,
     Media,
+    Inquiries,
     ...[Stats, ClientLogos, Capabilities, CaseStudies, ProcessSteps, ShowcaseSurfaces].map(
       withCollectionContent,
     ),
@@ -205,6 +235,9 @@ export default buildConfig({
   ].map(withGlobalContent),
 
   secret: process.env.PAYLOAD_SECRET || '',
+
+  // In-region media storage (S3, ap-southeast-1) when configured (T077, FR-030).
+  plugins: storagePlugins,
 
   db: postgresAdapter({
     pool: {

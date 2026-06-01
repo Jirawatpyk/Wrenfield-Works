@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Script from 'next/script'
 import type { ReactNode } from 'react'
 
+import { Analytics } from '@/components/layout/Analytics'
 import { ThemeProvider } from '@/components/providers/ThemeProvider'
 import { fontVariables } from '@/lib/fonts'
 import { LOCALES, isLocale } from '@/lib/i18n'
@@ -68,6 +69,7 @@ export default async function FrontendLayout({
           dangerouslySetInnerHTML={{ __html: themeBootScript }}
         />
         <ThemeProvider>{children}</ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )

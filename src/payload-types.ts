@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    inquiries: Inquiry;
     stats: Stat;
     'client-logos': ClientLogo;
     capabilities: Capability;
@@ -84,6 +85,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    inquiries: InquiriesSelect<false> | InquiriesSelect<true>;
     stats: StatsSelect<false> | StatsSelect<true>;
     'client-logos': ClientLogosSelect<false> | ClientLogosSelect<true>;
     capabilities: CapabilitiesSelect<false> | CapabilitiesSelect<true>;
@@ -191,6 +193,40 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+}
+/**
+ * Inquiries submitted from the public site. Personal data — auto-deleted 24 months after submission (PDPA, FR-027). Use “Delete” to honor an erasure request (FR-028).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries".
+ */
+export interface Inquiry {
+  id: number;
+  name: string;
+  email: string;
+  message: string;
+  /**
+   * Language the visitor was using (FR-024).
+   */
+  locale: 'en' | 'th';
+  /**
+   * Visitor agreed to data processing (FR-026).
+   */
+  consent: boolean;
+  /**
+   * When consent was given (server-set).
+   */
+  consentAt?: string | null;
+  /**
+   * Auto-deletion date = submitted + 24 months (FR-027).
+   */
+  expiresAt?: string | null;
+  /**
+   * Inbox triage state.
+   */
+  status?: ('new' | 'read' | 'archived') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -460,6 +496,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'inquiries';
+        value: number | Inquiry;
+      } | null)
+    | ({
         relationTo: 'stats';
         value: number | Stat;
       } | null)
@@ -565,6 +605,22 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "inquiries_select".
+ */
+export interface InquiriesSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  message?: T;
+  locale?: T;
+  consent?: T;
+  consentAt?: T;
+  expiresAt?: T;
+  status?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

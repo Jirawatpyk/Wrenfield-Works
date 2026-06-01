@@ -8,16 +8,23 @@ A **Spec-Kit-driven** project. The single active feature is **Wrenfield Works En
 — a bilingual (EN/ไทย) marketing site that faithfully reproduces an approved design, plus a
 self-hosted CMS for non-technical editors.
 
-**Current state (branch `001-enterprise-site-cms`):** Phases 1–4 are implemented — the scaffold,
+**Current state (branch `001-enterprise-site-cms`):** Phases 1–5 are implemented — the scaffold,
 Payload collections/globals, i18n locale routing, theming, seed, **User Story 1 (the public
-bilingual site MVP)**, and **User Story 2 (the CMS back office)** are built and passing tests. US2
-adds: deny-by-default access + admin bootstrap, the enforced EN/TH publish-completeness gate
-(`src/lib/validation/publishCompleteness.ts`), optimistic-concurrency conflict detection
-(`src/lib/concurrency.ts`), per-type/URL validation (`src/lib/validation/url.ts`), draft preview
-(`src/app/api/preview/route.ts`, HMAC-signed), and on-publish revalidation (`src/lib/revalidate.ts`).
-**Not yet built (User Story 3):** the inquiry write-path (`src/app/api/inquiries/`), email,
-cookieless analytics, and the 24-month retention job. Where this doc describes those in the present
-tense, treat them as the target design, not shipped code.
+bilingual site MVP)**, **User Story 2 (the CMS back office)**, and **User Story 3 (the PDPA inquiry
+flow)** are built and passing tests. US2 adds: deny-by-default access + admin bootstrap, the enforced
+EN/TH publish-completeness gate (`src/lib/validation/publishCompleteness.ts`), optimistic-concurrency
+conflict detection (`src/lib/concurrency.ts`), per-type/URL validation (`src/lib/validation/url.ts`),
+draft preview (`src/app/api/preview/route.ts`, HMAC-signed), and on-publish revalidation
+(`src/lib/revalidate.ts`). US3 adds: the public inquiry write-path (`src/app/api/inquiries/route.ts`
++ `src/collections/Inquiries.ts`, create-denied except via the validated route) with Zod validation
+(`src/lib/validation/inquiry.ts`), layered spam defense (`src/lib/rateLimit.ts` per-IP +
+`src/lib/turnstile.ts` fail-closed + honeypot), consent + a server-set 24-month `expiresAt`, a
+failure-isolated studio email (`src/lib/email.ts`), the back-office inbox, the daily retention job
+(`src/lib/retention.ts`, `src/jobs/retention.ts`, `pnpm retention`), cookieless analytics
+(`src/lib/analytics.ts` + `src/components/layout/Analytics.tsx`), the bilingual inquiry form
+(`src/components/sections/InquiryForm.tsx`, replacing the design's `mailto:`) + privacy notice, and
+in-region config (conditional S3 media storage + HSTS). **Remaining: Phase 6 (Polish & cross-cutting
+— T079–T085):** Lighthouse budget gate, full manual a11y pass, dependency/secret scan, doc finalize.
 
 The authoritative source of truth for *what* to build lives in `specs/001-enterprise-site-cms/`.
 **Read `spec.md` and `plan.md` before writing any implementation code.** Other key artifacts:

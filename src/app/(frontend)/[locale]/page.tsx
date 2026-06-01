@@ -98,7 +98,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           />
         ) : null}
         {c.testimonial ? <Testimonial testimonial={c.testimonial} /> : null}
-        {c.cta ? <CTA cta={c.cta} /> : null}
+        {c.cta ? <CTA cta={c.cta} locale={locale} /> : null}
       </main>
       {c.footer ? <Footer footer={c.footer} locale={locale} /> : null}
     </>

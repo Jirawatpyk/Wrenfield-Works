@@ -1004,6 +1004,9 @@ section.blk.rule-in::before {
   grid-template-columns: 0.85fr 1.15fr;
   gap: 60px;
   align-items: start;
+  /* Hoist the steps' scroll-progress timeline (defined on .process-steps below) so the
+     pinned panel's rail — a preceding sibling's descendant — can consume it. */
+  timeline-scope: --proc-progress;
 }
 .process-sticky {
   position: sticky;
@@ -1032,10 +1035,40 @@ section.blk.rule-in::before {
   color: var(--fg3);
   font-size: 14px;
 }
+/* Scroll-scrubbed progress rail (modernization). The fill scrubs 0 -> 100% as the steps
+   column passes the viewport, so the pinned panel reads as progressing through the system
+   — a pure-CSS scroll-driven "story", zero JS. Degrades to the faint static track where
+   scroll-timeline / timeline-scope are unsupported, and is held static under reduced
+   motion (§19). */
+.proc-rail {
+  margin-top: 30px;
+  width: 2px;
+  height: 132px;
+  border-radius: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.proc-rail-fill {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(var(--accent), var(--accent-deep));
+  transform: scaleY(0);
+  transform-origin: top;
+}
+@supports (animation-timeline: view()) and (timeline-scope: none) {
+  .proc-rail-fill {
+    animation: proc-fill linear both;
+    animation-timeline: --proc-progress;
+    animation-range: cover;
+  }
+}
 .process-steps {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  view-timeline-name: --proc-progress;
+  view-timeline-axis: block;
 }
 .pstep {
   border: 1px solid var(--line);
@@ -1490,6 +1523,14 @@ footer {
     transform: none;
   }
 }
+@keyframes proc-fill {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
 
 /* ============================================================
    17. RESPONSIVE — §5 exact @media steps (desktop-first)
@@ -1613,6 +1654,9 @@ body.motion-off .marquee-track {
 body.motion-off .hero-glow {
   animation: none;
 }
+body.motion-off .proc-rail-fill {
+  animation: none;
+}
 body.motion-off .reveal {
   animation: none;
   opacity: 1;
@@ -1667,6 +1711,9 @@ body.motion-off .case h4 {
     animation-play-state: paused;
   }
   .hero-glow {
+    animation: none;
+  }
+  .proc-rail-fill {
     animation: none;
   }
   .reveal {

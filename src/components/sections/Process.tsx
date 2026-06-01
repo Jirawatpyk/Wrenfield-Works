@@ -64,6 +64,12 @@ export function Process({
             <div className="big-n">{activeStep?.number}</div>
             <h3>{activeStep?.name}</h3>
             <div className="pth">{activeStep?.title}</div>
+            {/* Scroll-scrubbed progress rail — fills as the steps scroll past (pure CSS,
+                §11). Decorative, so aria-hidden; the active step is already conveyed by the
+                mirrored number/name above. */}
+            <div className="proc-rail" aria-hidden>
+              <span className="proc-rail-fill" />
+            </div>
           </div>
 
           <div className="process-steps">

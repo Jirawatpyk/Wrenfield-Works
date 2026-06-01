@@ -26,7 +26,6 @@ import { BrandIcon as BrandIcon_d9087a380941d12f95aff168665b00b4 } from '@/compo
 import { BrandLogo as BrandLogo_fd0a9bbb35693e340bbbfa9596236d37 } from '@/components/admin/BrandLogo'
 import { default as default_36ca1fe398355f0af6b14515ba7da960 } from '@/components/admin/WelcomeCard'
 import { default as default_ebe392a1a462e9ef050fc71c4ccc0442 } from '@/components/admin/PublishReadiness'
-import { DefaultDarkTheme as DefaultDarkTheme_a3fd479a15ddf347c68a04765a745412 } from '@/components/admin/DefaultDarkTheme'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -59,6 +58,5 @@ export const importMap = {
   "@/components/admin/BrandLogo#BrandLogo": BrandLogo_fd0a9bbb35693e340bbbfa9596236d37,
   "@/components/admin/WelcomeCard#default": default_36ca1fe398355f0af6b14515ba7da960,
   "@/components/admin/PublishReadiness#default": default_ebe392a1a462e9ef050fc71c4ccc0442,
-  "@/components/admin/DefaultDarkTheme#DefaultDarkTheme": DefaultDarkTheme_a3fd479a15ddf347c68a04765a745412,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

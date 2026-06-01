@@ -129,9 +129,12 @@ const withGlobalContent = (g: GlobalConfig): GlobalConfig => ({
 export default buildConfig({
   admin: {
     user: 'users',
-    // Ship both themes; the switcher stays in account settings. New editors are
-    // nudged to dark (the brand default) on first visit by the DefaultDarkTheme
-    // provider below — `theme: 'all'` keeps the choice available (T13).
+    // Ship both themes (dark + light) with the switcher in account settings.
+    // `theme: 'all'` lets each editor's choice — and, until they choose, their OS
+    // `prefers-color-scheme` — drive the admin theme (Payload's standard behavior).
+    // (We dropped a custom "force dark on first visit" provider: Payload's own
+    // ThemeProvider re-asserts the OS preference on mount, so any external nudge
+    // is overridden — fighting it isn't worth the fragility. Both themes are AA.)
     theme: 'all',
     // The back-office editing UI must also meet WCAG 2.1 AA (FR-007).
     components: {
@@ -144,9 +147,6 @@ export default buildConfig({
         Logo: '@/components/admin/BrandLogo#BrandLogo',
         Icon: '@/components/admin/BrandIcon#BrandIcon',
       },
-      // Default new editors to the dark (brand) theme on first visit without
-      // removing the switcher (T13). Client provider; uses the `@/*` alias.
-      providers: ['@/components/admin/DefaultDarkTheme#DefaultDarkTheme'],
       // Dashboard editor guidance (T9): bilingual welcome card + EN/TH publish-
       // readiness panel. Server components — Payload injects `payload` + `i18n`.
       // Use the `@/*` alias (same rationale as `graphics` above).

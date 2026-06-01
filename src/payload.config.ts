@@ -68,6 +68,14 @@ function emailFromAddress(): string {
  * `from`/`to` are set per-message in src/lib/email.ts; these are just defaults.
  */
 const SMTP_PORT = envInt('SMTP_PORT', 587, 1)
+// TLS mode: implicit TLS on 465, STARTTLS elsewhere — overridable via SMTP_SECURE=true|false
+// for a provider using implicit TLS on a non-465 port (nodemailer does not infer this).
+const SMTP_SECURE =
+  process.env.SMTP_SECURE === 'true'
+    ? true
+    : process.env.SMTP_SECURE === 'false'
+      ? false
+      : SMTP_PORT === 465
 const emailAdapter = process.env.SMTP_HOST
   ? nodemailerAdapter({
       defaultFromName: 'Wrenfield Works',
@@ -80,8 +88,7 @@ const emailAdapter = process.env.SMTP_HOST
       transportOptions: {
         host: process.env.SMTP_HOST,
         port: SMTP_PORT,
-        // Implicit TLS on 465; STARTTLS on 587/others. nodemailer does not infer this.
-        secure: SMTP_PORT === 465,
+        secure: SMTP_SECURE,
         auth:
           process.env.SMTP_USER && process.env.SMTP_PASS
             ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }

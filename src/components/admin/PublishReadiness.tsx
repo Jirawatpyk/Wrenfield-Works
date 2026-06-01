@@ -49,7 +49,10 @@ async function loadRow(
       fallbackLocale: 'none',
       draft: true,
       depth: 0,
-      limit: 100,
+      // No limit: readiness must reflect EVERY doc, or it could show "ready" while
+      // doc #101 is incomplete. Safe here — admin-only render over small editorial
+      // collections (not a public/hot path).
+      pagination: false,
       overrideAccess: true,
     })
     const docs = res.docs as unknown as Array<Record<string, unknown>>

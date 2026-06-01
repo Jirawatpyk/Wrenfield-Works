@@ -1,7 +1,13 @@
 import type { CollectionBeforeValidateHook, Field, GlobalBeforeValidateHook } from 'payload'
 import { APIError } from 'payload'
 
-import { isBlank, walkLocalizedLeaves, VALUE_FIELD_TYPES, type AnyRecord } from './localeFields'
+import {
+  isBlank,
+  walkLocalizedLeaves,
+  VALUE_FIELD_TYPES,
+  type AnyRecord,
+  type LocaleMap,
+} from './localeFields'
 
 /**
  * Publish-completeness gate (FR-014, admin-auth contract). A document may not
@@ -18,11 +24,10 @@ import { isBlank, walkLocalizedLeaves, VALUE_FIELD_TYPES, type AnyRecord } from 
  * The incoming write (flat, active-locale) is overlaid onto the active side of
  * those maps so that clearing a value and publishing in the same save is caught.
  *
- * `isBlank`, `VALUE_FIELD_TYPES`, and the schema walk live in `./localeFields`
- * so the readiness badge and the bilingual error share one definition (T1).
+ * `isBlank`, `VALUE_FIELD_TYPES`, `LocaleMap`, and the schema walk live in
+ * `./localeFields` so the readiness badge and the bilingual error share one
+ * definition (T1).
  */
-
-type LocaleMap = { en?: unknown; th?: unknown }
 
 /** A localized leaf under `locale: 'all'` is `{ en, th }`; incomplete if either is blank. */
 function localeMapIncomplete(value: unknown): boolean {

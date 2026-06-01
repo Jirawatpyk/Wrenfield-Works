@@ -10,6 +10,13 @@ import type { Field } from 'payload'
 
 export type AnyRecord = Record<string, unknown>
 
+/**
+ * A localized value leaf under a `locale: 'all'` read — `{ en, th }`. Defined once
+ * here (the shared home) and imported by the gate + the readiness badge so the
+ * leaf shape can't drift between the two consumers.
+ */
+export type LocaleMap = { en?: unknown; th?: unknown }
+
 /** Localized value field types whose leaves carry an `{ en, th }` map under `locale: 'all'`. */
 export const VALUE_FIELD_TYPES = new Set([
   'text',

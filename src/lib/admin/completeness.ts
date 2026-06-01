@@ -1,6 +1,11 @@
 import type { Field } from 'payload'
 
-import { isBlank, walkLocalizedLeaves, type AnyRecord } from '@/lib/validation/localeFields'
+import {
+  isBlank,
+  walkLocalizedLeaves,
+  type AnyRecord,
+  type LocaleMap,
+} from '@/lib/validation/localeFields'
 
 /** One missing localized leaf: which locales are present. `en`/`th` are TRUE when that locale is FILLED. */
 export type MissingLeaf = { path: string; label: string; en: boolean; th: boolean }
@@ -14,8 +19,6 @@ export type LocaleStatus = {
   /** Leaves missing at least one locale, each with its label and per-locale presence. */
   missing: MissingLeaf[]
 }
-
-type LocaleMap = { en?: unknown; th?: unknown }
 
 /**
  * Compute per-locale status by walking the schema over a `locale: 'all'`-shaped

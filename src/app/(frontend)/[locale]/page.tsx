@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 
-import { CustomCursor } from '@/components/layout/CustomCursor'
 import { Footer } from '@/components/layout/Footer'
 import { Nav } from '@/components/layout/Nav'
 import { SectionRules } from '@/components/layout/SectionRules'
@@ -72,7 +71,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
   return (
     <>
-      <CustomCursor />
       <SectionRules />
       {c.nav ? <Nav nav={c.nav} /> : null}
       <main id="main">

@@ -76,8 +76,6 @@
   --danger: #ff8a8a; /* form errors — ≈7:1 on --ink / --bg-2 (AA on dark, FR-007) */
   --on-accent: var(--ink); /* readable text on a brass fill */
   --lattice: var(--brass); /* lattice canvas node/line color */
-  --cursor: var(--brass-lt);
-  --cursor-ring: rgba(203, 162, 101, 0.6);
   --glow: rgba(181, 137, 74, 0.1);
 
   /* tweak-driven decorative opacities */
@@ -97,7 +95,7 @@ body.paper {
      surface (≈2.5:1). On paper the accent pair is darkened to bronze so brass-coloured
      TEXT (button labels, the "Works" wordmark, stat units, code keywords, the giant
      process number) clears AA — 4.5:1 for normal text, 3:1 for large. Decorative brass
-     (lattice/glow/cursor) keeps its own tokens below. */
+     (lattice/glow) keep their own tokens below. */
   --accent: #7a5e2a; /* ≈4.9:1 on paper bg — readable as text */
   --accent-deep: #6f5325; /* ≈5.5:1 — solid-button bg, borders, wordmark */
   --line: rgba(21, 24, 29, 0.14);
@@ -113,8 +111,6 @@ body.paper {
   --danger: #b3261e; /* form errors — ≈5.3:1 on --paper / --paper-2 (AA on paper) */
   --on-accent: #ffffff; /* white on the darkened bronze solid-button bg → ≥5:1 */
   --lattice: #9a7338;
-  --cursor: var(--brass);
-  --cursor-ring: rgba(154, 115, 56, 0.6);
   --glow: rgba(154, 115, 56, 0.08);
 }
 

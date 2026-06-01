@@ -15,16 +15,15 @@
    checked against docs/Frist Pilot-handoff/.../enterprise.css.
 
    Where the prototype hard-coded brass/mint literals (design-extract
-   Ambiguity #2) — lattice canvas, #86B88A pills/strings/trust dot, cursor
-   ring, hero glow, card-hover radial — this file uses the tokenized
+   Ambiguity #2) — lattice canvas, #86B88A pills/strings/trust dot,
+   hero glow, card-hover radial — this file uses the tokenized
    equivalents so BOTH themes meet WCAG 2.1 AA:
-     --accent / --accent-deep / --positive / --lattice / --cursor /
-     --cursor-ring / --glow / --on-accent (all defined per-theme in tokens.css).
+     --accent / --accent-deep / --positive / --lattice / --glow /
+     --on-accent (all defined per-theme in tokens.css).
    `--on-accent` replaces the prototype's literal `var(--ink)` for text on a
    brass fill so the paper theme stays legible.
 
    Section map:
-     1.  Custom cursor
      2.  Buttons (.btn / .btn.solid / .ghost / .arr)
      3.  Nav
      4.  Hero (+ word reveal, scroll hint, draw-on mark)
@@ -46,44 +45,6 @@
    ============================================================ */
 
 /* ============================================================
-   1. CUSTOM CURSOR (hidden ≤900px — see §17)
-   Tokenized: --cursor / --cursor-ring (were brass/rgba literals).
-   ============================================================ */
-.cursor-dot,
-.cursor-ring {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  z-index: 9500;
-  border-radius: 50%;
-  mix-blend-mode: difference;
-}
-.cursor-dot {
-  width: 6px;
-  height: 6px;
-  background: var(--cursor);
-  transform: translate(-50%, -50%);
-}
-.cursor-ring {
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--cursor-ring);
-  transform: translate(-50%, -50%);
-  transition:
-    width 0.25s var(--ease),
-    height 0.25s var(--ease),
-    opacity 0.25s var(--ease),
-    background 0.25s var(--ease);
-}
-.cursor-ring.hot {
-  width: 54px;
-  height: 54px;
-  background: color-mix(in srgb, var(--cursor) 8%, transparent);
-  border-color: var(--cursor);
-}
-
-/* ============================================================
    2. BUTTONS
    ============================================================ */
 .btn {
@@ -96,7 +57,7 @@
   color: var(--accent);
   background: transparent;
   transition: 0.35s var(--ease);
-  cursor: none;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 10px;
@@ -127,7 +88,7 @@
   border-radius: var(--r-pill);
   border: 1px solid var(--line);
   transition: 0.3s var(--ease);
-  cursor: none;
+  cursor: pointer;
 }
 .ghost:hover {
   color: var(--accent);
@@ -206,7 +167,7 @@
   color: var(--fg2);
   transition: 0.25s var(--ease);
   position: relative;
-  cursor: none;
+  cursor: pointer;
   white-space: nowrap;
 }
 .nav-links a.lk::after {
@@ -233,7 +194,7 @@
   border: 1px solid var(--line);
   border-radius: var(--r-pill);
   padding: 6px 12px;
-  cursor: none;
+  cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -244,7 +205,7 @@
   background: none;
   border: none;
   color: var(--fg3);
-  cursor: none;
+  cursor: pointer;
   padding: 0;
   transition: color 0.25s var(--ease);
 }
@@ -445,7 +406,7 @@
   border: 1px solid var(--line-strong);
   border-radius: var(--r-pill);
   padding: 6px 16px;
-  cursor: none;
+  cursor: pointer;
   transition:
     color 0.25s var(--ease),
     border-color 0.25s var(--ease);
@@ -486,7 +447,6 @@
   transition:
     opacity 0.3s var(--ease),
     color 0.3s var(--ease);
-  cursor: none;
 }
 .logo-item:hover {
   opacity: 1;
@@ -712,7 +672,7 @@ section.blk.rule-in::before {
   border-radius: var(--r-md);
   padding: 22px 24px;
   background: transparent;
-  cursor: none;
+  cursor: pointer;
   transition: 0.35s var(--ease);
   position: relative;
 }
@@ -1392,7 +1352,7 @@ footer {
   color: var(--fg2);
   margin-bottom: 12px;
   transition: 0.25s var(--ease);
-  cursor: none;
+  cursor: pointer;
 }
 .foot-col a:hover {
   color: var(--accent);
@@ -1477,17 +1437,6 @@ footer {
    ≤900px custom-cursor + ≤820/≤900px nav rules below complement the
    base ones already in globals.css / tokens.css.
    ============================================================ */
-
-/* re-enable native cursor + hide custom cursor on touch/small */
-@media (max-width: 900px) {
-  body {
-    cursor: auto;
-  }
-  .cursor-dot,
-  .cursor-ring {
-    display: none;
-  }
-}
 
 /* nav: tighten link spacing on medium screens. The language toggle STAYS — bilingual
    switching is core (FR-002/FR-003), not optional chrome. */

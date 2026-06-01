@@ -278,8 +278,17 @@ export interface CaseStudy {
    * Intentionally English-only (brand/technical label).
    */
   glyph: string;
+  /**
+   * The case-study title shown on the Work section card.
+   */
   title: string;
+  /**
+   * A short summary of the case study shown on its Work card.
+   */
   description: string;
+  /**
+   * Optional results line, e.g. “+38% conversion in 6 weeks”.
+   */
   metricsLine?: {
     root: {
       type: string;
@@ -340,11 +349,20 @@ export interface ShowcaseSurface {
    * Intentionally English-only (brand/technical label).
    */
   tabName: string;
+  /**
+   * The tab label for this showcase surface.
+   */
   tabTitle: string;
+  /**
+   * The short description shown when this showcase tab is open.
+   */
   tabDescription: string;
   panel?:
     | (
         | {
+            /**
+             * The row’s display name in this mock interface.
+             */
             name: string;
             /**
              * Intentionally English-only (brand/technical label).
@@ -366,6 +384,9 @@ export interface ShowcaseSurface {
                    * Intentionally English-only (brand/technical label).
                    */
                   value: string;
+                  /**
+                   * The caption under this KPI’s value.
+                   */
                   label: string;
                   id?: string | null;
                 }[]
@@ -794,6 +815,9 @@ export interface NavLabel {
  */
 export interface Marquee {
   id: number;
+  /**
+   * Short phrases that scroll across the moving strip near the top of the page.
+   */
   heading: string;
   _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
@@ -811,6 +835,9 @@ export interface SectionHeading {
          * Intentionally English-only (brand/technical label).
          */
         number: string;
+        /**
+         * The heading shown at the top of this section on the public page.
+         */
         title: {
           root: {
             type: string;
@@ -826,6 +853,9 @@ export interface SectionHeading {
           };
           [k: string]: unknown;
         };
+        /**
+         * The supporting line shown under this section’s heading.
+         */
         subtitle: string;
         id?: string | null;
       }[]
@@ -840,6 +870,9 @@ export interface SectionHeading {
  */
 export interface Testimonial {
   id: number;
+  /**
+   * The testimonial quote. The quotation marks are added automatically.
+   */
   quote: {
     root: {
       type: string;
@@ -855,6 +888,9 @@ export interface Testimonial {
     };
     [k: string]: unknown;
   };
+  /**
+   * Person’s name and role, e.g. “Head of Product”.
+   */
   attribution: {
     root: {
       type: string;
@@ -957,7 +993,13 @@ export interface Footer {
  */
 export interface SeoMetadatum {
   id: number;
+  /**
+   * Shown in Google search results and the browser tab — not on the page. Aim for under 60 characters.
+   */
   title: string;
+  /**
+   * The summary under the title in search results. Aim for under 160 characters.
+   */
   description: string;
   ogImage?: (number | null) | Media;
   _status?: ('draft' | 'published') | null;

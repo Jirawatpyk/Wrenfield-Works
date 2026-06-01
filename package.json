@@ -13,6 +13,7 @@
     "dev": "next dev",
     "devsafe": "rimraf .next && next dev",
     "build": "next build",
+    "vercel-build": "payload migrate && next build",
     "start": "next start",
     "lint": "eslint . && prettier --check . && tsc --noEmit",
     "lint:fix": "eslint . --fix && prettier --write .",
@@ -27,6 +28,8 @@
     "payload": "payload",
     "seed": "cross-env PAYLOAD_SEED=true payload run src/seed/seed.ts",
     "retention": "payload run src/jobs/retention.ts",
+    "migrate": "payload migrate",
+    "migrate:create": "payload migrate:create",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap"
   },

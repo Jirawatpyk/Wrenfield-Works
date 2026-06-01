@@ -7,7 +7,14 @@ import { publishCompletenessHook } from '../lib/validation/publishCompleteness'
 const mockRow: Block = {
   slug: 'mockRow',
   fields: [
-    localizedText({ name: 'name', required: true }),
+    localizedText({
+      name: 'name',
+      required: true,
+      description: {
+        en: 'The row’s display name in this mock interface.',
+        th: 'ชื่อที่แสดงของแถวนี้ในหน้าจอจำลอง',
+      },
+    }),
     monoText({ name: 'sub' }),
     monoText({ name: 'pillLabel' }),
     {
@@ -29,7 +36,14 @@ const kpiGrid: Block = {
       type: 'array',
       fields: [
         monoText({ name: 'value', required: true }),
-        localizedText({ name: 'label', required: true }),
+        localizedText({
+          name: 'label',
+          required: true,
+          description: {
+            en: 'The caption under this KPI’s value.',
+            th: 'คำบรรยายใต้ค่าตัวเลขของ KPI นี้',
+          },
+        }),
       ],
     },
   ],
@@ -88,8 +102,24 @@ export const ShowcaseSurfaces: CollectionConfig = {
   fields: [
     orderField,
     monoText({ name: 'tabName', label: 'Tab name', required: true }),
-    localizedText({ name: 'tabTitle', label: 'Tab title', required: true }),
-    localizedText({ name: 'tabDescription', label: 'Tab description', required: true }),
+    localizedText({
+      name: 'tabTitle',
+      label: 'Tab title',
+      required: true,
+      description: {
+        en: 'The tab label for this showcase surface.',
+        th: 'ป้ายแท็บของพื้นผิวโชว์เคสนี้',
+      },
+    }),
+    localizedText({
+      name: 'tabDescription',
+      label: 'Tab description',
+      required: true,
+      description: {
+        en: 'The short description shown when this showcase tab is open.',
+        th: 'คำอธิบายสั้น ๆ ที่แสดงเมื่อเปิดแท็บโชว์เคสนี้',
+      },
+    }),
     {
       name: 'panel',
       type: 'blocks',

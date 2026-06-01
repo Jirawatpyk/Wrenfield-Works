@@ -10,12 +10,14 @@ import type { Field } from 'payload'
  *   — section numbers, category tags, KPI units, status pills, brand names.
  */
 
+type LocalizedDescription = string | Record<'en' | 'th', string>
+
 type Common = {
   name: string
   label?: string
   required?: boolean
-  /** Short editor hint shown under the field. */
-  description?: string
+  /** Short editor hint shown under the field. String, or an EN/TH map. */
+  description?: LocalizedDescription
 }
 
 export const localizedText = ({ name, label, required, description }: Common): Field => ({
@@ -45,8 +47,16 @@ export const localizedRichText = ({ name, label, required, description }: Common
   ...(description ? { admin: { description } } : {}),
 })
 
-/** Intentionally non-localized brand/technical label (FR-011). */
-export const monoText = ({ name, label, required, description }: Common): Field => ({
+/**
+ * Intentionally non-localized brand/technical label (FR-011). Mono fields are
+ * English-only, so their description is a plain string (never an EN/TH map).
+ */
+export const monoText = ({
+  name,
+  label,
+  required,
+  description,
+}: Omit<Common, 'description'> & { description?: string }): Field => ({
   name,
   type: 'text',
   label,

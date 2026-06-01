@@ -9,5 +9,14 @@ export const Marquee: GlobalConfig = {
   admin: { group: 'Site Content' },
   access: { read: publishedOrStaff, update: isStaff },
   hooks: { beforeValidate: [publishCompletenessHook] },
-  fields: [localizedText({ name: 'heading', required: true })],
+  fields: [
+    localizedText({
+      name: 'heading',
+      required: true,
+      description: {
+        en: 'Short phrases that scroll across the moving strip near the top of the page.',
+        th: 'ข้อความสั้น ๆ ที่เลื่อนบนแถบวิ่งใกล้ด้านบนของหน้า',
+      },
+    }),
+  ],
 }

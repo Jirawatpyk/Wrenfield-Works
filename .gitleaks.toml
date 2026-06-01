@@ -1,0 +1,27 @@
+# gitleaks config — extends the default ruleset and allowlists KNOWN non-secret
+# fixtures: CI env placeholders (.github/workflows/ci.yml), the `.env.example`
+# template, dev-seed defaults, and integration-test credentials. None are real
+# secrets. The allowlist is by specific token regex (not broad paths) so a genuinely
+# leaked credential elsewhere is still caught.
+title = "Wrenfield Works"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Non-secret placeholders / templates / test fixtures"
+# .env.example is a template that, by policy, never holds real values.
+paths = [
+  '''\.env\.example''',
+]
+# The exact placeholder/fixture tokens committed in CI config, the seed dev default,
+# and the test harness. Matched against the detected secret value.
+regexes = [
+  '''ci-(secret|preview-secret|cron-secret)''',
+  '''change-me''',
+  '''dev-preview-secret-wrenfield''',
+  '''test-secret-wrenfield-integration''',
+  '''integration-(preview|cron)-secret''',
+  '''Admin1234!pw''',
+  '''Test1234!staff''',
+]

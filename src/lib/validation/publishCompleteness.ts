@@ -42,6 +42,22 @@ function collectMissing(fields: Field[], data: AnyRecord, prefix: string): strin
   return missing
 }
 
+type MissingDetail = { label: string; path: string; enMissing: boolean; thMissing: boolean }
+
+/** Walk the schema over a `locale: 'all'`-shaped doc, collecting incomplete leaves with detail. */
+function collectMissingDetailed(fields: Field[], data: AnyRecord, prefix: string): MissingDetail[] {
+  const out: MissingDetail[] = []
+  walkLocalizedLeaves(fields, data, prefix, (path, value, label) => {
+    const map = (
+      value && typeof value === 'object' && !Array.isArray(value) ? (value as LocaleMap) : {}
+    ) as LocaleMap
+    const enMissing = isBlank(map.en)
+    const thMissing = isBlank(map.th)
+    if (enMissing || thMissing) out.push({ label: label || path, path, enMissing, thMissing })
+  })
+  return out
+}
+
 /**
  * Overlay the incoming active-locale write onto the active side of the stored
  * `{ en, th }` maps, so clearing-then-publishing in one save is detected. Only
@@ -170,18 +186,41 @@ export const publishCompletenessHook: CollectionBeforeValidateHook &
       ? overlayActiveLocale(fields, stored, data, rawLocale)
       : stored
 
-  const missing = collectMissing(fields, merged, '')
+  const missing = collectMissingDetailed(fields, merged, '')
   if (missing.length > 0) {
-    throw new APIError(
-      `Cannot publish: both English and Thai are required. Missing or incomplete: ${missing.join(', ')}.`,
-      400,
-      undefined,
-      true,
-    )
+    const lang = (req as { i18n?: { language?: string } }).i18n?.language === 'th' ? 'th' : 'en'
+    // Name each field by its human label, but keep the raw path token in
+    // parentheses so editors can locate a field even when its label differs
+    // from its machine name (e.g. Stats' `label` field is labelled "Label").
+    const name = (m: MissingDetail) => (m.label === m.path ? m.label : `${m.label} (${m.path})`)
+    const enList = missing.filter((m) => m.enMissing).map(name)
+    const thList = missing.filter((m) => m.thMissing).map(name)
+
+    const parts: string[] = []
+    if (lang === 'th') {
+      // The EN phrase MUST stay verbatim ("Cannot publish … both English and
+      // Thai") for the US2 regression regex, so we prefix it even in TH-locale
+      // builds, then append the Thai-language detail.
+      parts.push('Cannot publish: both English and Thai are required.')
+      if (enList.length) parts.push(`ยังขาดภาษาอังกฤษ: ${enList.join(', ')}.`)
+      if (thList.length) parts.push(`ยังขาดภาษาไทย: ${thList.join(', ')}.`)
+    } else {
+      parts.push('Cannot publish: both English and Thai are required.')
+      if (enList.length) parts.push(`English still needed: ${enList.join(', ')}.`)
+      if (thList.length) parts.push(`Thai still needed: ${thList.join(', ')}.`)
+    }
+
+    throw new APIError(parts.join(' '), 400, undefined, true)
   }
 
   return data
 }
 
 // Exported for unit testing (T047).
-export const __test = { isBlank, localeMapIncomplete, collectMissing, overlayActiveLocale }
+export const __test = {
+  isBlank,
+  localeMapIncomplete,
+  collectMissing,
+  collectMissingDetailed,
+  overlayActiveLocale,
+}

@@ -6,7 +6,7 @@ import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { en } from '@payloadcms/translations/languages/en'
 import { th } from '@payloadcms/translations/languages/th'
 import { buildConfig } from 'payload'
-import type { CollectionConfig, GlobalConfig } from 'payload'
+import type { CollectionConfig, Field, GlobalConfig } from 'payload'
 import sharp from 'sharp'
 
 import { conflictDetectionHook } from './lib/concurrency'
@@ -41,6 +41,39 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
+ * Per-document EN/TH status banner (T10). A presentation-only `ui` field rendered
+ * at the top of every content edit view. It holds no data (skipped by the
+ * completeness walker and by `generate:types`), so the DB schema and the publish
+ * gate are unchanged. Prepended to each content type's `fields` via the wrappers
+ * below. Path uses the `@/*` alias (same rationale as the `admin.components` paths).
+ */
+// Factory (NOT a shared constant): Payload mutates field objects in place during
+// config sanitization, so each entity needs its own fresh object.
+//
+// The field's identity is baked in via `serverProps`: Payload's field
+// server-component props expose `collectionSlug` but NOT `globalSlug` (see
+// renderField.js / ServerComponentProps), so a component cannot discover which
+// GLOBAL it belongs to at render time. We pass `{ contentSlug, contentKind }`
+// explicitly through the object-form component (`{ path, exportName, serverProps }`,
+// which `RenderServerComponent` spreads into the RSC) so the banner knows its own
+// document on both collections and globals. The import-map key stays
+// `…/LocaleStatusField#default`, unchanged from the string form.
+const makeLocaleStatusField = (contentSlug: string, contentKind: 'collection' | 'global') =>
+  ({
+    name: 'localeStatus',
+    type: 'ui' as const,
+    admin: {
+      components: {
+        Field: {
+          path: '@/components/admin/LocaleStatusField',
+          exportName: 'default',
+          serverProps: { contentSlug, contentKind },
+        },
+      },
+    },
+  }) satisfies Field
+
+/**
  * US2 cross-cutting wiring applied to every CONTENT collection/global (not Users/Media):
  *   - conflict detection (FR-020a) appended after the publish-completeness gate,
  *   - on-publish revalidation (FR-016) on change/delete,
@@ -49,6 +82,8 @@ const dirname = path.dirname(filename)
  */
 const withCollectionContent = (c: CollectionConfig): CollectionConfig => ({
   ...c,
+  // Per-document EN/TH status banner shown first on every content edit view (T10).
+  fields: [makeLocaleStatusField(c.slug, 'collection'), ...c.fields],
   // Open-time concurrent-edit guard (FR-020a, defense-in-depth alongside the optimistic
   // save-time check in src/lib/concurrency.ts): Payload warns when another editor holds the doc.
   lockDocuments: c.lockDocuments ?? { duration: 300 },
@@ -67,6 +102,8 @@ const withCollectionContent = (c: CollectionConfig): CollectionConfig => ({
 
 const withGlobalContent = (g: GlobalConfig): GlobalConfig => ({
   ...g,
+  // Per-document EN/TH status banner shown first on every content edit view (T10).
+  fields: [makeLocaleStatusField(g.slug, 'global'), ...g.fields],
   // Open-time concurrent-edit guard (FR-020a, defense-in-depth — see the collection wrapper).
   lockDocuments: g.lockDocuments ?? { duration: 300 },
   admin: {

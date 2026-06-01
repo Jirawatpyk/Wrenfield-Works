@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useSyncExternalStore } from 're
 import type { ReactNode } from 'react'
 
 import { DEFAULT_THEME, THEME_STORAGE_KEY, isTheme, type Theme } from '@/lib/theme'
+import { startViewTransition } from '@/lib/viewTransition'
 
 /**
  * Client theme controller (T018). The persisted theme lives in an EXTERNAL store
@@ -53,13 +54,28 @@ function getServerThemeSnapshot(): Theme {
   return DEFAULT_THEME
 }
 
+function applyTheme(next: Theme): void {
+  document.body.classList.toggle('paper', next === 'paper')
+}
+
 function persistTheme(next: Theme): void {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, next)
   } catch {
     /* storage unavailable — theme still applies for this session */
   }
-  document.body.classList.toggle('paper', next === 'paper')
+  // Animate the swap as a circular reveal from the toggle (globals.css `vt-theme-reveal`).
+  // `vt-theme` scopes that effect so it never alters the locale/route cross-fade; it is
+  // removed once the transition settles. startViewTransition() no-ops (applies instantly)
+  // under reduced motion or where the API is unsupported.
+  const root = document.documentElement
+  root.classList.add('vt-theme')
+  const transition = startViewTransition(() => applyTheme(next))
+  if (transition) {
+    transition.finished.finally(() => root.classList.remove('vt-theme'))
+  } else {
+    root.classList.remove('vt-theme')
+  }
   notify()
 }
 

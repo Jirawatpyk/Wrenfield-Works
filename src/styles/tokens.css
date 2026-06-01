@@ -77,6 +77,7 @@
   --on-accent: var(--ink); /* readable text on a brass fill */
   --lattice: var(--brass); /* lattice canvas node/line color */
   --glow: rgba(181, 137, 74, 0.1);
+  --glow-2: rgba(203, 162, 101, 0.07); /* secondary mesh bloom (modernization) */
 
   /* tweak-driven decorative opacities */
   --tx-grain: 0.04;
@@ -112,6 +113,7 @@ body.paper {
   --on-accent: #ffffff; /* white on the darkened bronze solid-button bg → ≥5:1 */
   --lattice: #9a7338;
   --glow: rgba(154, 115, 56, 0.08);
+  --glow-2: rgba(122, 94, 42, 0.06);
 }
 
 /* Honor the OS reduced-motion preference globally (FR-006). `body.motion-off`

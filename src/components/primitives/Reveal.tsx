@@ -1,26 +1,27 @@
-'use client'
-
-import { useEffect, useRef, type ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 
 type RevealTag = 'div' | 'section' | 'li' | 'article' | 'span' | 'p' | 'h2' | 'h3' | 'h4'
 
 /**
- * Reveal — scroll-into-view fade primitive (design-extract §4.4).
+ * Reveal — scroll-into-view entrance (design-extract §4.4), implemented with native
+ * CSS scroll-driven animations (`animation-timeline: view()`, components.css §15). It
+ * ships ZERO JS — the old IntersectionObserver client component is gone — and runs on
+ * the compositor.
  *
- * Renders children starting WITHOUT `.in` (stable SSR markup), then adds `.in` to fade them in.
+ * Safety / progressive enhancement (content must NEVER stay hidden):
+ *   1. The hidden initial state + the reveal animation live inside
+ *      `@supports (animation-timeline: view())`, so a browser without scroll-driven
+ *      animations renders the content visible (no animation, never stuck at opacity 0).
+ *   2. Reduced motion disables the animation entirely (§19), pinning the visible state —
+ *      necessary because scroll-driven animations ignore `animation-duration`, so the
+ *      global reduced-motion neutralizer in globals.css cannot stop them on its own.
+ *   3. Above-the-fold elements are already past the reveal range on first paint, so they
+ *      load fully visible.
  *
- * CRITICAL correctness rule: content must NEVER stay hidden. The decorative lattice canvases
- * run a continuous rAF loop that saturates the main thread, and under that load an
- * IntersectionObserver/scroll callback can be delayed or dropped — which previously left
- * revealed-once elements stuck at opacity:0 (content silently missing). So this is layered:
- *   1. reduced motion → reveal instantly.
- *   2. IntersectionObserver (threshold 0) reveals as each element scrolls in — the nice path.
- *   3. A hard timeout reveals EVERY remaining element after ~1s regardless of scroll position
- *      or observer health. This guarantees content is visible even if the observer never fires.
- * Whichever fires first wins; we reveal at most once, then disconnect.
- *
- * `delay` drives `transition-delay` (callers use it for the §4.4 stagger, e.g. index*70).
- * `dataStagger` emits `data-stagger`.
+ * `delay` (ms — the prototype's index*70 stagger) becomes a small scroll-range offset via
+ * the `--rv` custom property so grid items still cascade as they enter; `dataStagger`
+ * emits `data-stagger` for grouped callers. This is a shared (non-client) component, so
+ * it renders fine inside both server and client sections.
  */
 export function Reveal({
   children,
@@ -35,60 +36,12 @@ export function Reveal({
   delay?: number
   dataStagger?: boolean
 }) {
-  const ref = useRef<HTMLElement | null>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-
-    let revealed = false
-    let observer: IntersectionObserver | null = null
-    let timer: ReturnType<typeof setTimeout> | null = null
-
-    const reveal = () => {
-      if (revealed) return
-      revealed = true
-      el.classList.add('in')
-      observer?.disconnect()
-      if (timer) clearTimeout(timer)
-    }
-
-    // 1. Reduced motion: reveal immediately, no animation.
-    if (document.body.classList.contains('motion-off')) {
-      el.classList.add('in')
-      return
-    }
-
-    // 2. Reveal on scroll-in (threshold 0 = the moment any edge enters the viewport).
-    if (typeof IntersectionObserver !== 'undefined') {
-      observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) if (entry.isIntersecting) reveal()
-        },
-        { threshold: 0, rootMargin: '0px 0px -8% 0px' },
-      )
-      observer.observe(el)
-    } else {
-      reveal()
-    }
-
-    // 3. Hard guarantee: reveal no matter what within ~1s (covers dropped observer callbacks
-    //    under canvas CPU load, and any element the user never scrolls to).
-    timer = setTimeout(reveal, 1000)
-
-    return () => {
-      observer?.disconnect()
-      if (timer) clearTimeout(timer)
-    }
-  }, [])
-
   const Tag = as
 
   return (
     <Tag
-      ref={ref as React.Ref<never>}
       className={['reveal', className].filter(Boolean).join(' ')}
-      style={{ transitionDelay: delay ? `${delay}ms` : undefined }}
+      style={delay ? ({ '--rv': `${Math.min(60, delay / 7)}%` } as CSSProperties) : undefined}
       data-stagger={dataStagger ? '' : undefined}
     >
       {children}

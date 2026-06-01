@@ -38,6 +38,35 @@ svg {
 }
 
 /* ----------------------------------------------------------------
+   Atmosphere (modernization). An animatable gradient driver (--glow-shift,
+   registered so it interpolates) powers the hero's scroll-linked mesh drift,
+   and a fixed film-grain overlay adds tactile texture. The grain is
+   pointer-events:none at very low opacity (--tx-grain), so it never affects
+   layout or input, and is scoped to the public site (globals.css is imported
+   only by the frontend layout, never the Payload admin).
+   ---------------------------------------------------------------- */
+@property --glow-shift {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  /* Plain low-opacity overlay (no mix-blend-mode): a blend layer must re-composite
+     against its backdrop every time the content beneath repaints (the lattice canvas
+     at 40fps, the scroll-linked glow), which erodes the compositor wins. A flat overlay
+     stays on its own GPU layer and is effectively free. */
+  opacity: var(--tx-grain);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/* ----------------------------------------------------------------
    Base typography (ported verbatim from the design's enterprise.css
    §type scale). This element-level layer was missing, which left
    section <h2>s, .kicker, .lead, p, .label and .num at browser
@@ -178,5 +207,37 @@ header[id] {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ----------------------------------------------------------------
+   View Transitions (modernization). The browser cross-fades route/state changes.
+   Here we (1) honour reduced motion by disabling every view-transition animation
+   (the browser then swaps instantly — scroll-driven/VT animations ignore the
+   duration neutralizer above, so they must be turned off explicitly), and (2) give
+   the theme swap a circular reveal from the toggle button, scoped to html.vt-theme
+   so it never alters the locale/route cross-fade. Coordinates come from --vt-x /
+   --vt-y (set by ThemeToggle). Browsers without the API simply swap instantly.
+   ---------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+html.vt-theme::view-transition-old(root) {
+  animation: none;
+}
+html.vt-theme::view-transition-new(root) {
+  animation: vt-theme-reveal 0.5s var(--ease);
+}
+@keyframes vt-theme-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(140% at var(--vt-x, 50%) var(--vt-y, 50%));
   }
 }

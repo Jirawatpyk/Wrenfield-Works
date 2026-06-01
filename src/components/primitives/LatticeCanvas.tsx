@@ -128,14 +128,14 @@ export function LatticeCanvas({
       buildNodes()
     }
 
-    const drawFrame = (advance: boolean, now: number) => {
+    const drawFrame = (advance: boolean, now: number, step = 1) => {
       ctx.clearRect(0, 0, width, height)
 
       // Update + draw nodes.
       for (const n of nodes) {
         if (advance) {
-          n.x += n.vx
-          n.y += n.vy
+          n.x += n.vx * step
+          n.y += n.vy * step
           if (n.x < 0 || n.x > width) n.vx *= -1
           if (n.y < 0 || n.y > height) n.vy *= -1
           n.x = Math.max(0, Math.min(width, n.x))
@@ -148,8 +148,8 @@ export function LatticeCanvas({
             const dist = Math.hypot(dx, dy)
             if (dist > 0 && dist < opts.react) {
               const force = (opts.react - dist) / opts.react
-              n.x += (dx / dist) * force * 0.6
-              n.y += (dy / dist) * force * 0.6
+              n.x += (dx / dist) * force * 0.6 * step
+              n.y += (dy / dist) * force * 0.6 * step
             }
           }
         }
@@ -200,7 +200,7 @@ export function LatticeCanvas({
         for (let p = pulses.length - 1; p >= 0; p--) {
           const pulse = pulses[p]
           if (!pulse) continue
-          if (advance) pulse.t += 0.012
+          if (advance) pulse.t += 0.012 * step
           if (pulse.t >= 1) {
             pulses.splice(p, 1)
             continue
@@ -219,10 +219,20 @@ export function LatticeCanvas({
       }
     }
 
+    // Cap the decorative field at ~40fps. The proximity-link pass is O(n^2), so
+    // trimming 60 -> 40fps meaningfully relieves the main thread; `step` compensates
+    // each draw for the real elapsed time, so the drift speed is unchanged by the cap
+    // (clamped so a long gap — e.g. a backgrounded tab — can't fling nodes).
+    const FRAME_MS = 1000 / 40
+    let lastFrame = 0
     const loop = (now: number) => {
       if (!running) return
-      drawFrame(true, now)
       rafId = requestAnimationFrame(loop)
+      const elapsed = now - lastFrame
+      if (elapsed < FRAME_MS) return
+      const step = Math.min(3, elapsed / (1000 / 60))
+      lastFrame = now
+      drawFrame(true, now, step)
     }
 
     const start = () => {

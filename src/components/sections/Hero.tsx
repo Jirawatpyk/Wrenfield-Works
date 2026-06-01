@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react'
 import type { HeroVM } from '@/lib/content'
 import { RichInline } from '@/lib/richtext'
 import { Button } from '@/components/primitives/Button'
-import { Reveal } from '@/components/primitives/Reveal'
 import { LatticeCanvas } from '@/components/primitives/LatticeCanvas'
 
 /**
@@ -12,10 +11,11 @@ import { LatticeCanvas } from '@/components/primitives/LatticeCanvas'
  * content (all aria-hidden). A scroll hint anchors the bottom (hidden on short/narrow
  * viewports via CSS).
  *
- * The kicker/subhead/CTA/trust use the <Reveal> client primitive (scroll-into-view fade)
- * rather than a bare `reveal` class — the prototype relied on enterprise.js to add `.in`,
- * which we don't port, so a static class would stay at opacity:0 forever. Reveal honors
- * reduced motion (shows instantly).
+ * The kicker/headline/subhead/CTA/trust cascade in on load via a pure-CSS staggered
+ * entrance (§4 `hero-rise`/`hero-h1-rise`) — no JS, so it costs nothing on the bundle.
+ * The <h1> (the LCP element) keeps opacity >= 0.5 and rises via transform only, so the
+ * entrance never delays LCP or shifts layout (CLS). All of it is disabled under reduced
+ * motion (§19), where every element resolves to its final, fully visible state.
  */
 export function Hero({ hero }: { hero: HeroVM }) {
   return (
@@ -47,27 +47,25 @@ export function Hero({ hero }: { hero: HeroVM }) {
           <circle cx={76} cy={34} r={4} fill="currentColor" />
         </svg>
 
-        <Reveal as="p" className="kicker">
-          {hero.kicker}
-        </Reveal>
+        <p className="kicker">{hero.kicker}</p>
         <h1 className="hero-h1">
           <RichInline value={hero.headline} />
         </h1>
-        <Reveal as="p" className="sub lead">
+        <p className="sub lead">
           <RichInline value={hero.subhead} />
-        </Reveal>
-        <Reveal className="cta">
+        </p>
+        <div className="cta">
           <Button href="#work" variant="solid" magnetic>
             {hero.primaryCtaLabel} <span className="arr">→</span>
           </Button>
           <Button href="#contact" magnetic>
             {hero.secondaryCtaLabel}
           </Button>
-        </Reveal>
-        <Reveal className="trust">
+        </div>
+        <div className="trust">
           <span className="dot" aria-hidden />
           <span>{hero.trustLabel}</span>
-        </Reveal>
+        </div>
       </div>
       {/* Scroll cue (prototype's `.scroll-hint`). Decorative. */}
       <div className="scroll-hint" aria-hidden>

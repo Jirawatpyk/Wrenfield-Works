@@ -10,12 +10,24 @@ export type ContentType = {
   href: string
 }
 
-/** Collections that are NOT editorial content (no EN/TH publish gate). */
+/**
+ * Non-editorial collections to exclude from the readiness panel.
+ *
+ * NOTE: the real exclusion net is the `hasDrafts` filter in getContentTypes —
+ * editorial content opts into `versions.drafts`, while Payload-internal
+ * collections (`payload-preferences`, `payload-migrations`, `payload-locked-documents`,
+ * `payload-jobs`, …) and the auth/upload collections do NOT, so they're filtered
+ * out regardless. This denylist is belt-and-suspenders: it names the well-known
+ * infra collections explicitly so the intent is obvious and a future internal
+ * collection that ever shipped with drafts still can't leak in.
+ */
 const NON_CONTENT_COLLECTIONS = new Set([
   'users',
   'media',
   'payload-preferences',
   'payload-migrations',
+  'payload-locked-documents',
+  'payload-jobs',
 ])
 
 export function titleFromSlug(slug: string): string {

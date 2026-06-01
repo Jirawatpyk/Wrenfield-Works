@@ -21,6 +21,14 @@ import '@/styles/globals.css'
 export const metadata: Metadata = {
   title: 'Wrenfield Works — Enterprise systems, built right.',
   description: 'AI-assisted systems, built right.',
+  // Brand favicon (the lattice "W" mark). Served from public/favicon.svg — the same
+  // asset the Payload admin uses. Target browsers (Chrome/Edge/FF 111+, Safari 16.4+)
+  // all support SVG favicons, so no .ico fallback is needed. Per-page generateMetadata
+  // (page.tsx) sets no `icons`, so this is inherited across the public site.
+  icons: {
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
+    shortcut: ['/favicon.svg'],
+  },
 }
 
 export function generateStaticParams() {

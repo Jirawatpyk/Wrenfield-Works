@@ -294,6 +294,13 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URI || '',
+      // Force verified TLS for any non-local DB (managed Postgres like Neon) regardless of
+      // whether the connection string carries `sslmode=require` — without this, a URL missing
+      // sslmode connects insecurely and the server rejects it ("connection is insecure").
+      // Local docker Postgres (localhost/127.0.0.1) uses no TLS.
+      ...(/@(?:localhost|127\.0\.0\.1|\[?::1\]?)(?::|\/)/.test(process.env.DATABASE_URI || '')
+        ? {}
+        : { ssl: true }),
     },
   }),
 

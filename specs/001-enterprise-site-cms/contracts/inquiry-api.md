@@ -4,7 +4,12 @@ The only public **write** surface. Backs User Story 3 and FR-022–029.
 
 ## Endpoint
 
-`POST /api/inquiries`
+`POST /api/inquiries/submit`
+
+> Mounted one segment deep (NOT `/api/inquiries`): `/api/inquiries` and
+> `/api/inquiries/{id}` belong to Payload's collection REST API (used by the admin inbox
+> + delete-on-request), so a route directly at `/api/inquiries` would shadow them. The
+> collection's `create: denyAll` is the real gate; this route is the only public ingress.
 
 - Content-Type: `application/json`
 - Public (no auth). Protected by Turnstile token + honeypot + per-IP rate limit.

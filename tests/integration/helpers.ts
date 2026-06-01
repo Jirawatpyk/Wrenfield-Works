@@ -19,8 +19,12 @@ process.env.DATABASE_URI =
   process.env.TEST_DATABASE_URI || 'postgres://wrenfield:wrenfield@localhost:5432/wrenfield_test'
 process.env.PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || 'test-secret-wrenfield-integration'
 process.env.NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
-// A studio recipient so the inquiry-email path is exercised (the route's afterChange
-// hook now skips sending when no recipient is configured — src/lib/email.ts).
+// Configure the inquiry-email path so the afterChange hook actually attempts a send
+// (the hook skips when SMTP_HOST is unset, and email.ts skips when no recipient). A
+// loopback host fast-refuses real sends (T064/T065 tolerate {sent:false}); T066 stubs
+// payload.sendEmail to assert failure isolation. The adapter uses skipVerify, so booting
+// Payload here does not open a live SMTP handshake.
+process.env.SMTP_HOST = process.env.SMTP_HOST || '127.0.0.1'
 process.env.INQUIRY_NOTIFY_TO = process.env.INQUIRY_NOTIFY_TO || 'studio@wrenfield.test'
 process.env.EMAIL_FROM = process.env.EMAIL_FROM || 'Wrenfield Works <no-reply@wrenfield.test>'
 

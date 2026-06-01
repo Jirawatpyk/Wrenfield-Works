@@ -21,7 +21,8 @@ const log = childLogger('inquiry-email')
 /** The minimal email shape Payload's `sendEmail` (Nodemailer) accepts. */
 export interface EmailMessage {
   to: string
-  from: string
+  /** Omitted when no EMAIL_FROM is configured, so the adapter's defaultFromAddress applies. */
+  from?: string
   subject: string
   text: string
   html: string
@@ -59,7 +60,7 @@ export function buildInquiryNotification(
   opts: { to?: string; from?: string } = {},
 ): EmailMessage {
   const to = opts.to ?? process.env.INQUIRY_NOTIFY_TO ?? ''
-  const from = opts.from ?? process.env.EMAIL_FROM ?? ''
+  const from = (opts.from ?? process.env.EMAIL_FROM ?? '').trim()
   const submitted =
     inquiry.submittedAt instanceof Date
       ? inquiry.submittedAt.toISOString()
@@ -91,7 +92,9 @@ export function buildInquiryNotification(
     <p style="white-space:pre-wrap">${escapeHtml(inquiry.message)}</p>
   `.trim()
 
-  return { to, from, subject, text, html }
+  // Only include `from` when configured; an empty `from` would override the email
+  // adapter's defaultFromAddress with an invalid empty sender.
+  return from ? { to, from, subject, text, html } : { to, subject, text, html }
 }
 
 /**

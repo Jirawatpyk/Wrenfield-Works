@@ -167,7 +167,7 @@ consent blocked; simulated email failure doesn't lose the record; back-dated rec
 
 - [X] T070 [US3] `Inquiries` collection (consent, consentAt, submittedAt, expiresAt, status; create=public, read/update/delete=staff) in `src/collections/Inquiries.ts` — create=`denyAll` (public create only via the validated route w/ `overrideAccess`); no drafts/versions (PDPA permanent-delete); `submittedAt`=Payload `createdAt`; `expiresAt`/`status` indexed
 - [X] T071 [P] [US3] Inquiry validation schema (Zod) in `src/lib/validation/inquiry.ts` — localized field errors (FR-023) + route response copy
-- [X] T072 [US3] `POST /api/inquiries` route: validate, spam (challenge + honeypot + rate-limit 5/IP/hr), persist, set `expiresAt = +24mo` (inquiry-api contract) in `src/app/api/inquiries/route.ts` (+ `src/lib/rateLimit.ts`, `src/lib/turnstile.ts` fail-closed)
+- [X] T072 [US3] `POST /api/inquiries/submit` route: validate, spam (challenge + honeypot + rate-limit 5/IP/hr; max=0 disables), persist, set `expiresAt = +24mo` (inquiry-api contract) in `src/app/api/inquiries/submit/route.ts` (mounted one segment deep so it never shadows Payload's `/api/inquiries` collection REST; + `src/lib/rateLimit.ts`, `src/lib/turnstile.ts` fail-closed)
 - [X] T073 [US3] Inquiry form UI: consent checkbox + privacy-notice link, localized errors, loading state (FR-026, FR-005a, FR-007d) in `src/components/sections/InquiryForm.tsx` — replaces the design's `mailto:` in `CTA.tsx`; + bilingual privacy page `src/app/(frontend)/[locale]/privacy/page.tsx`
 - [X] T074 [US3] Email notification on create — best-effort, failure-isolated, logged (FR-029) in `src/lib/email.ts` (pure builder HTML-escapes + strips CR/LF; wired as Inquiries `afterChange`)
 - [X] T075 [US3] Back-office inbox (name/email/message/locale/time/status) + delete-on-request (FR-024, FR-028) — `Inquiries` admin group "Inbox", `-createdAt` sort, readOnly submitted fields, built-in delete
@@ -181,7 +181,7 @@ consent blocked; simulated email failure doesn't lose the record; back-dated rec
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [X] T079 [P] Lighthouse CI budget gate (LCP<2.5s, INP<200ms, CLS<0.1, JS≤200KB) wired in CI — `lighthouserc.json` asserts LCP≤2500, CLS≤0.1, TBT≤200 (INP lab proxy), and **`resource-summary:script:size` ≤ 204800 bytes (200KB)**; run by the `lighthouse` CI job
+- [X] T079 [P] Lighthouse CI budget gate (LCP<2.5s, INP<200ms, CLS<0.1, JS≤200KB) wired in CI — `lighthouserc.json` HARD-GATES (level `error`) LCP≤2500, CLS≤0.1, and **`resource-summary:script:size` ≤ 204800 bytes (200KB)**; TBT≤200 (the lab proxy for INP, a field-only metric) is tracked at `warn`; run by the `lighthouse` CI job
 - [X] T080 [P] Full WCAG 2.1 AA manual keyboard + screen-reader pass (public + back office, both themes) per quickstart.md — automated axe across all states + NEW public keyboard-nav e2e (`tests/e2e/us1-keyboard.spec.ts`); manual pass recorded in `docs/accessibility.md`
 - [X] T081 [P] Dependency vulnerability scan gate (no high/critical) + no-secrets-in-source check in CI — `security` job: `pnpm audit --audit-level high` (verified: 0 high/critical) + gitleaks-action
 - [X] T082 [P] Coverage gate ≥ 80% on business-logic modules (`src/lib/**`, hooks, access, retention, email) in CI — `test` job runs `pnpm test:ci` (vitest v8 thresholds 80); current 90.99/80.6/95.23/90.99

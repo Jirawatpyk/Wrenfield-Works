@@ -36,15 +36,24 @@ export const runtime = 'nodejs'
 
 const log = childLogger('inquiry')
 
-/** Parse a non-negative integer env var, preserving an explicit 0 (e.g. "disable"). */
+/**
+ * Parse a non-negative integer env var. An unset OR empty/whitespace value falls back
+ * to the default (Number('') would otherwise coerce to 0); a malformed value also falls
+ * back. An explicit numeric value (incl. 0) is honored.
+ */
 function envInt(name: string, fallback: number, min = 0): number {
-  const n = Number(process.env[name])
+  const raw = process.env[name]
+  if (raw == null || raw.trim() === '') return fallback
+  const n = Number(raw)
   return Number.isFinite(n) && n >= min ? n : fallback
 }
 
 // In-memory per-IP limiter (FR-025). Single in-region instance; low write volume.
+// INQUIRY_RATE_LIMIT_MAX=0 DISABLES the limit (the check below is skipped); an unset or
+// empty value falls back to 5. A positive value caps submissions per IP per window.
+const RATE_LIMIT_MAX = envInt('INQUIRY_RATE_LIMIT_MAX', 5, 0)
 const limiter = createRateLimiter({
-  max: envInt('INQUIRY_RATE_LIMIT_MAX', 5, 0),
+  max: RATE_LIMIT_MAX,
   windowMs: envInt('INQUIRY_RATE_LIMIT_WINDOW_MS', 3_600_000, 1),
 })
 
@@ -73,9 +82,9 @@ export async function POST(request: Request): Promise<Response> {
   const submittedLocale = normalizeLocale((raw as { locale?: string } | null)?.locale)
   const msgs = responseMessages(submittedLocale)
 
-  // 1. Rate limit (FR-025).
+  // 1. Rate limit (FR-025). Skipped entirely when disabled (max=0).
   const ip = clientIp(request)
-  if (!limiter.check(ip).allowed) {
+  if (RATE_LIMIT_MAX > 0 && !limiter.check(ip).allowed) {
     incr('inquiry.rate_limited')
     return Response.json({ ok: false, error: msgs.rateLimited }, { status: 429 })
   }

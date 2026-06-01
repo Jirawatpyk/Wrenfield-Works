@@ -17,7 +17,7 @@ access-control layer.
 | Resource | Create | Read | Update | Delete |
 |----------|--------|------|--------|--------|
 | Content collections & globals | staff | staff (admin) / public (published only) | staff | staff |
-| `Inquiries` | public (via `/api/inquiries` only) | staff | staff | staff (incl. delete-on-request FR-028) |
+| `Inquiries` | public (via `POST /api/inquiries/submit` only; collection `create: denyAll`) | staff | staff | staff (incl. delete-on-request FR-028) |
 | `Users` | staff | staff | staff (self + others) | staff |
 | `Media` | staff | staff / public (referenced assets) | staff | staff |
 

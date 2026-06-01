@@ -175,9 +175,15 @@ export function InquiryForm({ locale }: { locale: Locale }) {
         setSuccessMsg(json.message || copy.success)
         trackEvent(INQUIRY_SUBMITTED_EVENT, { locale })
         form.reset()
-        // form.reset() clears the single-use Turnstile token; regenerate one so a
-        // second submission in the same session isn't rejected as a failed challenge.
-        ;(globalThis as { turnstile?: { reset?: () => void } }).turnstile?.reset?.()
+        // form.reset() clears the single-use Turnstile token; regenerate one so a second
+        // submission isn't rejected. Isolated in its own try/catch so a widget-API throw
+        // can NEVER flip the just-succeeded UI back to the error state (which would push the
+        // visitor to resubmit an already-stored inquiry → duplicate).
+        try {
+          ;(globalThis as { turnstile?: { reset?: () => void } }).turnstile?.reset?.()
+        } catch {
+          /* non-critical: the next submission gets a fresh challenge regardless */
+        }
         return
       }
       if (res.status === 400 && json.errors) {

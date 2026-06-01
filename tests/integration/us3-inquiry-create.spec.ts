@@ -9,7 +9,7 @@
  * challenge is skipped (dev/test). Each request uses a unique IP so the per-IP
  * rate limiter never bleeds across tests.
  *
- * Source of truth: src/app/api/inquiries/route.ts, src/collections/Inquiries.ts.
+ * Source of truth: src/app/api/inquiries/submit/route.ts, src/collections/Inquiries.ts.
  */
 import { describe, it, expect, beforeAll } from 'vitest'
 import type { Payload } from 'payload'

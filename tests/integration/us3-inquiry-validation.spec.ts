@@ -9,7 +9,7 @@
  * Runs the real route handler against the test Postgres. Most tests use a unique
  * IP; the rate-limit test deliberately reuses ONE IP to trip the limiter.
  *
- * Source of truth: src/app/api/inquiries/route.ts.
+ * Source of truth: src/app/api/inquiries/submit/route.ts.
  */
 import { describe, it, expect, beforeAll } from 'vitest'
 

@@ -3,6 +3,10 @@ import type { CollectionAfterChangeHook, CollectionConfig } from 'payload'
 import { denyAll, isStaff } from '../access'
 import { sendInquiryNotification } from '../lib/email'
 import type { Locale } from '../lib/i18n'
+import { childLogger } from '../lib/logging'
+import { incr } from '../lib/observability'
+
+const emailLog = childLogger('inquiry-email')
 
 /**
  * Inquiries (T070, T075, data-model.md — PERSONAL DATA / PDPA).
@@ -25,6 +29,14 @@ import type { Locale } from '../lib/i18n'
 /** Best-effort studio notification on a NEW inquiry (FR-029). Never throws / never blocks the write. */
 const notifyStudioOnCreate: CollectionAfterChangeHook = ({ doc, operation, req }) => {
   if (operation !== 'create') return doc
+  // With no SMTP transport configured, Payload's default sendEmail only logs and RESOLVES —
+  // which would falsely increment inquiry.email.sent. Mark it unconfigured and skip so
+  // monitoring reflects reality (the stored inquiry is unaffected — FR-029).
+  if (!process.env.SMTP_HOST) {
+    incr('inquiry.email.unconfigured')
+    emailLog.warn('inquiry notification skipped: no SMTP transport configured (set SMTP_HOST)')
+    return doc
+  }
   const inquiry = doc as {
     name: string
     email: string

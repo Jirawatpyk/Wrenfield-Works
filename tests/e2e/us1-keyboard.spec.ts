@@ -1,11 +1,10 @@
 /**
  * T080 [US1] — Public-site keyboard navigation (FR-007 / FR-007d, WCAG 2.1 AA).
  *
- * Complements the axe audits (us1-a11y) with the things automation-by-rules can't
- * see: that controls are REACHABLE by Tab, that keyboard focus is VISIBLE (the
- * token :focus-visible ring), and that the inquiry form has a logical tab order
- * with the honeypot excluded from the keyboard path. (Accessible-name coverage is
- * handled by the axe specs.)
+ * Complements the axe audits (us1-a11y) with what rule-based checks can't see: that
+ * controls are REACHABLE by Tab, that keyboard focus is VISIBLE (the token focus ring),
+ * and that the inquiry form has a logical tab order with the honeypot excluded.
+ * (Accessible-name coverage is handled by the axe specs.)
  */
 import { test, expect, type Page } from '@playwright/test'
 
@@ -24,30 +23,31 @@ test.describe('US1 — public keyboard navigation', () => {
   test('Tab reaches multiple controls, each with a visible focus ring', async ({ page }) => {
     await gotoHome(page, 'en')
 
-    const focused: Array<{ key: string; outlined: boolean; focusVisible: boolean }> = []
-    for (let i = 0; i < 18; i++) {
+    // Walk the tab order; record the focus ring on EVERY control actually landed on.
+    const focused: Array<{ key: string; ring: boolean }> = []
+    for (let i = 0; i < 20; i++) {
       await page.keyboard.press('Tab')
       const r = await page.evaluate(() => {
         const el = document.activeElement as HTMLElement | null
-        if (!el || el === document.body) return null
+        if (!el || el === document.body || el === document.documentElement) return null
         const cs = getComputedStyle(el)
-        return {
-          key: el.id || el.getAttribute('data-testid') || el.tagName.toLowerCase(),
-          outlined: cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0,
-          focusVisible: el.matches(':focus-visible'),
-        }
+        // The token :focus-visible rule applies a 2px outline on keyboard focus.
+        const ring = cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0
+        return { key: el.id || el.getAttribute('data-testid') || el.tagName.toLowerCase(), ring }
       })
       if (r) focused.push(r)
     }
 
-    // Reached several distinct interactive controls by keyboard alone.
+    // Reached several distinct interactive controls by keyboard alone (not vacuous).
+    expect(focused.length).toBeGreaterThan(3)
     expect(new Set(focused.map((f) => f.key)).size).toBeGreaterThan(3)
 
-    // Keyboard focus is visibly indicated: every control matching :focus-visible
-    // shows the token outline ring (FR-007 visible focus indicator).
-    const keyboardFocused = focused.filter((f) => f.focusVisible)
-    expect(keyboardFocused.length).toBeGreaterThan(0)
-    expect(keyboardFocused.every((f) => f.outlined)).toBe(true)
+    // EVERY keyboard-focused control shows a visible focus ring (no `outline:none` regressions).
+    const noRing = focused.filter((f) => !f.ring)
+    expect(
+      noRing,
+      `controls reached by Tab with no visible focus ring: ${JSON.stringify(noRing)}`,
+    ).toEqual([])
   })
 
   test('inquiry form has a logical tab order and skips the honeypot', async ({ page }) => {
@@ -57,8 +57,9 @@ test.describe('US1 — public keyboard navigation', () => {
     await page.locator('#inquiry-name').focus()
     expect(await focusedKey(page)).toBe('inquiry-name')
 
+    // Generous headroom (name→email→message→consent→privacy-link→submit is 5 stops).
     const keys: Array<string | null> = ['inquiry-name']
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 8; i++) {
       await page.keyboard.press('Tab')
       keys.push(await focusedKey(page))
     }

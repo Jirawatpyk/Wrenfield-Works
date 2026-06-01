@@ -8,9 +8,16 @@
  *
  * Source of truth: src/lib/retention.ts.
  */
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+import type { Payload } from 'payload'
 
-import { addMonths, computeExpiresAt, isExpired, RETENTION_MONTHS } from '@/lib/retention'
+import {
+  addMonths,
+  computeExpiresAt,
+  isExpired,
+  runRetention,
+  RETENTION_MONTHS,
+} from '@/lib/retention'
 
 describe('addMonths', () => {
   it('adds whole months', () => {
@@ -66,5 +73,42 @@ describe('isExpired', () => {
 
   it('is false when expiresAt is still in the future', () => {
     expect(isExpired('2026-06-01T00:00:01.000Z', now)).toBe(false)
+  })
+})
+
+describe('runRetention (monitored delete, FR-027/FR-027a)', () => {
+  /** Minimal fake Payload whose delete() returns a canned bulk-delete result. */
+  const fakePayload = (result: unknown) =>
+    ({ delete: vi.fn().mockResolvedValue(result) }) as unknown as Payload
+
+  it('reports the deleted count when the bulk delete fully succeeds', async () => {
+    const payload = fakePayload({ docs: [{ id: 1 }, { id: 2 }], errors: [] })
+    await expect(
+      runRetention(payload, { now: new Date('2026-06-01T00:00:00.000Z') }),
+    ).resolves.toEqual({ ok: true, deleted: 2 })
+  })
+
+  it('queries by expiresAt <= now', async () => {
+    const payload = fakePayload({ docs: [], errors: [] })
+    await runRetention(payload, { now: new Date('2026-06-01T00:00:00.000Z') })
+    const call = (payload.delete as unknown as ReturnType<typeof vi.fn>).mock.calls[0]![0]
+    expect(call.collection).toBe('inquiries')
+    expect(call.where.expiresAt.less_than_equal).toBe('2026-06-01T00:00:00.000Z')
+  })
+
+  it('THROWS when Payload reports per-record delete errors (run marked failed → FR-027a catch-up)', async () => {
+    // Payload bulk delete RESOLVES even on partial failure, collecting failures in `errors`.
+    const payload = fakePayload({
+      docs: [{ id: 1 }],
+      errors: [{ id: 2, message: 'fk constraint' }],
+    })
+    await expect(runRetention(payload)).rejects.toThrow(/failed to delete/i)
+  })
+
+  it('propagates an outright delete rejection (so the scheduler records a failed run)', async () => {
+    const payload = {
+      delete: vi.fn().mockRejectedValue(new Error('db down')),
+    } as unknown as Payload
+    await expect(runRetention(payload)).rejects.toThrow('db down')
   })
 })

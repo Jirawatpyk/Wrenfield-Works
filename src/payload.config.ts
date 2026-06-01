@@ -49,19 +49,35 @@ const dirname = path.dirname(filename)
  * disk upload (dev/test) so neither needs cloud credentials. Region defaults to
  * `ap-southeast-1` for PDPA data residency.
  */
+/** Extract a bare email address from EMAIL_FROM (`"Name <addr>"` or `"addr"`); '' if none. */
+function emailFromAddress(): string {
+  const raw = (process.env.EMAIL_FROM || '').trim()
+  const angle = /<([^>]+)>/.exec(raw)
+  if (angle?.[1]) return angle[1].trim()
+  return raw.includes('@') ? raw : ''
+}
+
 /**
  * Studio email transport (T074, FR-029). Wired ONLY when SMTP is configured; without
- * it Payload falls back to a console transport (dev/test) — so an unconfigured deploy
+ * it Payload falls back to its console transport (dev/test) — so an unconfigured deploy
  * is visible (no real delivery) rather than silently pretending to send. The inquiry
  * `from`/`to` are set per-message in src/lib/email.ts; these are just defaults.
  */
+const SMTP_PORT = Number(process.env.SMTP_PORT) || 587
 const emailAdapter = process.env.SMTP_HOST
   ? nodemailerAdapter({
       defaultFromName: 'Wrenfield Works',
-      defaultFromAddress: process.env.SMTP_USER || 'no-reply@wrenfieldworks.com',
+      // Derive the sender from EMAIL_FROM — NOT SMTP_USER, which is often a non-email
+      // login (e.g. SendGrid 'apikey', SES IAM username) and would be an invalid From.
+      defaultFromAddress: emailFromAddress() || 'no-reply@wrenfieldworks.com',
+      // Don't block a cold start on a live SMTP handshake (the "usable within 3s" budget);
+      // a misconfigured transport surfaces per-send (failure-isolated) instead.
+      skipVerify: true,
       transportOptions: {
         host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT) || 587,
+        port: SMTP_PORT,
+        // Implicit TLS on 465; STARTTLS on 587/others. nodemailer does not infer this.
+        secure: SMTP_PORT === 465,
         auth:
           process.env.SMTP_USER && process.env.SMTP_PASS
             ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }

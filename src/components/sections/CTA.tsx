@@ -38,7 +38,7 @@ export function CTA({ cta, locale }: { cta: CtaVM; locale: Locale }) {
             magnetic button) and the "book a call" link (cta.bookCallLabel). */}
         <Reveal className="cta">
           {cta.email ? (
-            <Button href={`mailto:${cta.email}`} variant="solid" magnetic>
+            <Button href={safeHref(`mailto:${cta.email}`)} variant="solid" magnetic>
               {cta.email} <span className="arr">→</span>
             </Button>
           ) : null}

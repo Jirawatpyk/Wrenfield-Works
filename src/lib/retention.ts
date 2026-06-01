@@ -57,11 +57,12 @@ export function addMonths(date: Date | string, months: number): Date {
 }
 
 /**
- * The retention expiry for a submission: submittedAt + `months`. Defaults to the
- * env-configured window (`retentionMonths()`, 24 unless overridden) so a caller that
- * omits `months` still respects INQUIRY_RETENTION_MONTHS rather than hard-coding 24.
+ * The retention expiry for a submission: submittedAt + `months` (default 24). Kept PURE
+ * — the default is the constant, NOT the env-reading retentionMonths(), so the helper has
+ * no hidden process.env dependency. Callers that want the configured window pass it
+ * explicitly (the inquiry route calls `computeExpiresAt(now, retentionMonths())`).
  */
-export function computeExpiresAt(submittedAt: Date | string, months = retentionMonths()): Date {
+export function computeExpiresAt(submittedAt: Date | string, months = RETENTION_MONTHS): Date {
   return addMonths(submittedAt, months)
 }
 

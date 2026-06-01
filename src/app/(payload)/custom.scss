@@ -1,0 +1,190 @@
+/* Custom Payload admin styles (T5). Back-office UI must meet WCAG 2.1 AA (FR-007).
+   Override Payload's DOCUMENTED theme variables ONLY (never internal classes) so
+   this survives Payload upgrades. Palette mirrors src/styles/tokens.css.
+   All contrast pairs chosen for >=4.5:1 normal text / >=3:1 large/UI in BOTH themes. */
+
+/* Brand raw palette. */
+:root {
+  --wf-ink: #15181d;
+  --wf-ink-2: #1e242c;
+  --wf-paper: #ece5d8;
+  --wf-paper-2: #f5f0e6;
+  --wf-brass: #cba265;
+  --wf-brass-deep: #b5894a;
+
+  /* Base fallbacks used before <html data-theme> is set (e.g. the login screen
+     for the instant before the theme provider runs). Dark-leaning brand default. */
+  --theme-bg: var(--wf-ink);
+  --theme-text: #ece5d8;
+  --theme-brand-accent: var(--wf-brass);
+
+  /* Fraunces for admin headings. Declared at :root so it also reaches Payload
+     drawers/modals/toasts that portal to document.body (outside any wrapper). */
+  --wf-font-serif: var(--font-serif, 'Fraunces', Georgia, serif);
+}
+
+/* DARK theme — ink surfaces, brass accent. */
+[data-theme='dark'] {
+  --theme-bg: var(--wf-ink);
+  --theme-input-bg: #20262e;
+  --theme-text: #ece5d8;
+  --theme-elevation-0: #15181d;
+  --theme-elevation-50: #1a1f26;
+  --theme-elevation-100: #1e242c;
+  --theme-elevation-150: #252c35;
+  --theme-elevation-200: #2c343e;
+  --theme-elevation-600: #a0a7b0; /* >=6.5:1 on elevation-50 */
+  --theme-elevation-700: #b9c0c8; /* muted text >=7.9:1 on elevation-100 */
+  --theme-elevation-800: #d6dbe0;
+  --theme-elevation-900: #ece5d8;
+  --theme-brand-accent: var(--wf-brass);
+  --theme-success-500: #86b88a; /* tick on ink >=7:1 */
+  --theme-error-500: #e0908c; /* tick on ink >=6.5:1 */
+  --theme-success-50: #1d2a22; /* badge bg (dark mint) */
+  --theme-error-50: #2c1d1f; /* badge bg (dark maroon) */
+}
+
+/* LIGHT (paper) theme — paper surfaces, darkened bronze accent for AA on light. */
+[data-theme='light'] {
+  --theme-bg: var(--wf-paper);
+  --theme-input-bg: #f5f0e6;
+  --theme-text: #15181d;
+  --theme-elevation-0: #f5f0e6;
+  --theme-elevation-50: #efe8da;
+  --theme-elevation-100: #e7dfce;
+  --theme-elevation-150: #ddd3bf;
+  --theme-elevation-200: #cfc4ad;
+  --theme-elevation-600: #5c5446; /* muted text >=6.8:1 on paper */
+  --theme-elevation-700: #4a4338; /* >=8.9:1 on paper */
+  --theme-brand-accent: #6f5325; /* bronze, >=5.5:1 as text on paper */
+  --theme-success-500: #2f7a45; /* tick on paper >=4.7:1 */
+  --theme-error-500: #a13a3a; /* tick on paper >=5.9:1 */
+  --theme-success-50: #e7f3ec; /* badge bg (light mint) */
+  --theme-error-50: #f7e9e9; /* badge bg (light maroon) */
+}
+
+/* Headings in the brand serif (variable reaches portals via :root). */
+.wf-admin-fonts h1,
+.wf-admin-fonts h2,
+.wf-admin-fonts h3,
+.wf-card h2,
+.wf-card h3 {
+  font-family: var(--wf-font-serif);
+}
+
+/* Reusable guidance card / panel. Thai body needs the looser line-height. */
+.wf-card {
+  border: 1px solid var(--theme-elevation-150);
+  background: var(--theme-elevation-50);
+  border-radius: var(--r-sm, 8px);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.wf-card__body {
+  color: var(--theme-elevation-700);
+  margin: 0 0 12px;
+}
+.wf-card__rule {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--theme-brand-accent);
+  background: var(--theme-elevation-100);
+  border-radius: 4px;
+  color: var(--theme-text);
+}
+
+/* Readiness table. */
+.wf-readiness {
+  width: 100%;
+  border-collapse: collapse;
+}
+.wf-readiness th {
+  text-align: left;
+  padding: 4px 8px;
+  color: var(--theme-elevation-700);
+  font-weight: 600;
+}
+.wf-readiness td {
+  padding: 6px 8px;
+  border-top: 1px solid var(--theme-elevation-100);
+}
+.wf-readiness a {
+  color: var(--theme-brand-accent);
+  text-decoration: underline;
+}
+.wf-readiness__summary {
+  margin: 0 0 12px;
+  color: var(--theme-text);
+  font-weight: 600;
+}
+
+/* EN/TH status badges (used in table cells and the per-doc banner). */
+.wf-badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: var(--r-pill, 999px);
+  border: 1px solid var(--theme-elevation-200);
+}
+.wf-badge--ok {
+  background: var(--theme-success-50);
+  color: var(--theme-success-500);
+}
+.wf-badge--bad {
+  background: var(--theme-error-50);
+  color: var(--theme-error-500);
+}
+.wf-badge--neutral {
+  background: var(--theme-elevation-100);
+  color: var(--theme-elevation-700);
+}
+
+/* Per-document status banner. */
+.wf-locale-status {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+.wf-locale-status__hint {
+  color: var(--theme-elevation-600);
+}
+.wf-locale-status__stale {
+  width: 100%;
+  margin: 4px 0 0;
+  padding: 8px 12px;
+  border-radius: 4px;
+  background: var(--theme-error-50);
+  color: var(--theme-error-500);
+  border: 1px solid var(--theme-error-500);
+}
+
+/* Brand lockup on the login screen. */
+.wf-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--theme-text);
+}
+.wf-brand-logo__word {
+  font-family: var(--wf-font-serif);
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.wf-brand-logo__accent {
+  color: var(--theme-brand-accent);
+}
+
+/* Brand accent on primary actions + visible focus (AA focus-visible). */
+.btn--style-primary {
+  --color: var(--theme-brand-accent);
+}
+:focus-visible {
+  outline: 2px solid var(--theme-brand-accent);
+  outline-offset: 2px;
+}

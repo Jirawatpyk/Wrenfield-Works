@@ -10,5 +10,21 @@
     "pr-review-toolkit@claude-plugins-official": true,
     "qodo-skills@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "bash",
+            "command": "node \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/format-changed.mjs\"",
+            "statusMessage": "Formatting changed file",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
   }
 }

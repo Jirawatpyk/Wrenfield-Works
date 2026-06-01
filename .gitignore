@@ -1,0 +1,67 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production build
+/build
+/dist
+
+# testing / coverage
+/coverage
+/playwright-report
+/test-results
+/.nyc_output
+/blob-report
+/playwright/.cache
+
+# lighthouse
+/.lighthouseci
+
+# payload generated media uploads (local dev)
+/media
+
+# env — never commit secrets (see .env.example)
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# turbo / caches
+/.turbo
+*.tsbuildinfo
+
+# transient task/verify artifacts
+*.exit
+.docker.log
+.gen-*.log
+.build.log
+.pnpm-install*.log
+.claude/scheduled_tasks.lock
+
+# Playwright MCP inspection snapshots (transient)
+.playwright-mcp/
+
+# Local Claude Code state (agent memory, ad-hoc agent defs, local settings).
+# Already-tracked files under .claude/ (hooks, skills, configured review agents,
+# settings.json) stay tracked — this only stops NEW untracked items from appearing.
+.claude/*
+

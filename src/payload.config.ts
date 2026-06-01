@@ -129,6 +129,10 @@ const withGlobalContent = (g: GlobalConfig): GlobalConfig => ({
 export default buildConfig({
   admin: {
     user: 'users',
+    // Ship both themes; the switcher stays in account settings. New editors are
+    // nudged to dark (the brand default) on first visit by the DefaultDarkTheme
+    // provider below — `theme: 'all'` keeps the choice available (T13).
+    theme: 'all',
     // The back-office editing UI must also meet WCAG 2.1 AA (FR-007).
     components: {
       // Use the `@/*` tsconfig alias (-> ./src/*) rather than a leading-slash
@@ -140,6 +144,9 @@ export default buildConfig({
         Logo: '@/components/admin/BrandLogo#BrandLogo',
         Icon: '@/components/admin/BrandIcon#BrandIcon',
       },
+      // Default new editors to the dark (brand) theme on first visit without
+      // removing the switcher (T13). Client provider; uses the `@/*` alias.
+      providers: ['@/components/admin/DefaultDarkTheme#DefaultDarkTheme'],
       // Dashboard editor guidance (T9): bilingual welcome card + EN/TH publish-
       // readiness panel. Server components — Payload injects `payload` + `i18n`.
       // Use the `@/*` alias (same rationale as `graphics` above).

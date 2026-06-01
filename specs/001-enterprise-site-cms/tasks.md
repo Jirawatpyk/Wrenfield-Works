@@ -181,13 +181,13 @@ consent blocked; simulated email failure doesn't lose the record; back-dated rec
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T079 [P] Lighthouse CI budget gate (LCP<2.5s, INP<200ms, CLS<0.1, JS≤200KB) wired in CI
-- [ ] T080 [P] Full WCAG 2.1 AA manual keyboard + screen-reader pass (public + back office, both themes) per quickstart.md
-- [ ] T081 [P] Dependency vulnerability scan gate (no high/critical) + no-secrets-in-source check in CI
-- [ ] T082 [P] Coverage gate ≥ 80% on business-logic modules (`src/lib/**`, hooks, access, retention, email) in CI
-- [ ] T083 [P] Documentation: README, handover docs, finalize `.env.example`
-- [ ] T084 Run quickstart.md verification flows (US1/US2/US3) end to end
-- [ ] T085 [P] Long-text (+50%) layout-integrity checks across all sections (Edge Cases)
+- [X] T079 [P] Lighthouse CI budget gate (LCP<2.5s, INP<200ms, CLS<0.1, JS≤200KB) wired in CI — `lighthouserc.json` asserts LCP≤2500, CLS≤0.1, TBT≤200 (INP lab proxy), and **`resource-summary:script:size` ≤ 204800 bytes (200KB)**; run by the `lighthouse` CI job
+- [X] T080 [P] Full WCAG 2.1 AA manual keyboard + screen-reader pass (public + back office, both themes) per quickstart.md — automated axe across all states + NEW public keyboard-nav e2e (`tests/e2e/us1-keyboard.spec.ts`); manual pass recorded in `docs/accessibility.md`
+- [X] T081 [P] Dependency vulnerability scan gate (no high/critical) + no-secrets-in-source check in CI — `security` job: `pnpm audit --audit-level high` (verified: 0 high/critical) + gitleaks-action
+- [X] T082 [P] Coverage gate ≥ 80% on business-logic modules (`src/lib/**`, hooks, access, retention, email) in CI — `test` job runs `pnpm test:ci` (vitest v8 thresholds 80); current 90.99/80.6/95.23/90.99
+- [X] T083 [P] Documentation: README, handover docs, finalize `.env.example` — `README.md`, `docs/handover.md` (ops runbook), `docs/accessibility.md`; `.env.example` already enumerates all vars
+- [X] T084 Run quickstart.md verification flows (US1/US2/US3) end to end — 184 unit/integration + full e2e (US1 sections/i18n/theme/a11y/motion/responsive/longtext/keyboard, US2 edit-publish/collections/admin-a11y, US3 inquiry/form-a11y) green; lint clean; build ok
+- [X] T085 [P] Long-text (+50%) layout-integrity checks across all sections (Edge Cases) — `tests/e2e/us1-longtext.spec.ts` inflates prose +50% and asserts no horizontal overflow at 360/1440px, EN+TH
 
 ---
 

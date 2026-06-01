@@ -124,14 +124,22 @@ const main = async () => {
   // env-overridable and default to the local dev values. NEVER seed real
   // production credentials this way — set ADMIN_EMAIL / ADMIN_PASSWORD in the
   // deployment environment instead.
-  // Refuse to seed a publicly-known default credential in production.
-  if (process.env.NODE_ENV === 'production' && !process.env.ADMIN_PASSWORD) {
+  // Refuse to seed a publicly-known credential in production: reject BOTH an unset
+  // password AND the `.env.example` template value (`change-me-*`). Otherwise a deployer
+  // who copies the template and runs the seed in prod would create an admin with a
+  // publicly-known password.
+  const adminPasswordEnv = process.env.ADMIN_PASSWORD
+  if (
+    process.env.NODE_ENV === 'production' &&
+    (!adminPasswordEnv || /change-me/i.test(adminPasswordEnv))
+  ) {
     throw new Error(
-      '[seed] ADMIN_PASSWORD must be set in production — refusing to create an admin with a default password.',
+      '[seed] ADMIN_PASSWORD must be set to a strong, non-default value in production — ' +
+        'refusing to create an admin with a missing or template password.',
     )
   }
   const adminEmail = process.env.ADMIN_EMAIL || 'admin@wrenfield.test'
-  const adminPassword = process.env.ADMIN_PASSWORD || 'Admin1234!pw'
+  const adminPassword = adminPasswordEnv || 'Admin1234!pw'
   const existingAdmin = await payload.find({
     collection: 'users',
     where: { email: { equals: adminEmail } },

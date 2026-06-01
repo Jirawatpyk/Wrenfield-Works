@@ -34,12 +34,21 @@ export function CTA({ cta, locale }: { cta: CtaVM; locale: Locale }) {
         <Reveal className="cta-form-wrap">
           <InquiryForm locale={locale} />
         </Reveal>
-        <Reveal className="links">
+        {/* Secondary contact routes alongside the form: the studio email (primary
+            magnetic button) and the "book a call" link (cta.bookCallLabel). */}
+        <Reveal className="cta">
           {cta.email ? (
-            <a className="ghost" href={safeHref(`mailto:${cta.email}`)}>
-              {cta.email}
-            </a>
+            <Button href={`mailto:${cta.email}`} variant="solid" magnetic>
+              {cta.email} <span className="arr">→</span>
+            </Button>
           ) : null}
+          {cta.bookCallLabel ? (
+            <Button href="#" magnetic>
+              {cta.bookCallLabel}
+            </Button>
+          ) : null}
+        </Reveal>
+        <Reveal className="links">
           {cta.socialLinks.map((link, i) => (
             <a key={`${link.url}-${i}`} className="ghost" href={safeHref(link.url)}>
               {link.label}

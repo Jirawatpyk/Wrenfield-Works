@@ -56,8 +56,12 @@ export function addMonths(date: Date | string, months: number): Date {
   )
 }
 
-/** The retention expiry for a submission: submittedAt + `months` (default 24). */
-export function computeExpiresAt(submittedAt: Date | string, months = RETENTION_MONTHS): Date {
+/**
+ * The retention expiry for a submission: submittedAt + `months`. Defaults to the
+ * env-configured window (`retentionMonths()`, 24 unless overridden) so a caller that
+ * omits `months` still respects INQUIRY_RETENTION_MONTHS rather than hard-coding 24.
+ */
+export function computeExpiresAt(submittedAt: Date | string, months = retentionMonths()): Date {
   return addMonths(submittedAt, months)
 }
 
@@ -84,15 +88,28 @@ export async function runRetention(
   const now = opts.now ?? new Date()
   return trace('retention.run', async () => {
     try {
-      const result = await payload.delete({
+      const result = (await payload.delete({
         collection: 'inquiries' as never,
         where: { expiresAt: { less_than_equal: now.toISOString() } } as never,
         overrideAccess: true,
-      })
-      const deleted = Array.isArray((result as { docs?: unknown[] }).docs)
-        ? (result as { docs: unknown[] }).docs.length
-        : 0
+      })) as { docs?: unknown[]; errors?: Array<{ id?: unknown; message?: string }> }
+
+      const deleted = Array.isArray(result.docs) ? result.docs.length : 0
       incr('retention.deleted', undefined, deleted)
+
+      // Payload's bulk delete RESOLVES even when some documents fail, collecting
+      // per-record failures in `errors`. Treat any as a failed run so the scheduler
+      // alerts and the next run retries them (FR-027a) — never silently retain.
+      const errors = Array.isArray(result.errors) ? result.errors : []
+      if (errors.length > 0) {
+        incr('retention.delete_errors', undefined, errors.length)
+        log.error(
+          { deleted, failed: errors.length, ids: errors.map((e) => e?.id) },
+          'retention: some records failed to delete; next run will retry (FR-027a)',
+        )
+        throw new Error(`retention: ${errors.length} record(s) failed to delete`)
+      }
+
       log.info({ deleted }, 'retention run complete')
       return { ok: true, deleted }
     } catch (err) {

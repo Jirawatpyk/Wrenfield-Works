@@ -2,6 +2,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { s3Storage } from '@payloadcms/storage-s3'
 import { en } from '@payloadcms/translations/languages/en'
@@ -48,6 +49,27 @@ const dirname = path.dirname(filename)
  * disk upload (dev/test) so neither needs cloud credentials. Region defaults to
  * `ap-southeast-1` for PDPA data residency.
  */
+/**
+ * Studio email transport (T074, FR-029). Wired ONLY when SMTP is configured; without
+ * it Payload falls back to a console transport (dev/test) — so an unconfigured deploy
+ * is visible (no real delivery) rather than silently pretending to send. The inquiry
+ * `from`/`to` are set per-message in src/lib/email.ts; these are just defaults.
+ */
+const emailAdapter = process.env.SMTP_HOST
+  ? nodemailerAdapter({
+      defaultFromName: 'Wrenfield Works',
+      defaultFromAddress: process.env.SMTP_USER || 'no-reply@wrenfieldworks.com',
+      transportOptions: {
+        host: process.env.SMTP_HOST,
+        port: Number(process.env.SMTP_PORT) || 587,
+        auth:
+          process.env.SMTP_USER && process.env.SMTP_PASS
+            ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+            : undefined,
+      },
+    })
+  : undefined
+
 const storagePlugins = process.env.S3_BUCKET
   ? [
       s3Storage({
@@ -235,6 +257,9 @@ export default buildConfig({
   ].map(withGlobalContent),
 
   secret: process.env.PAYLOAD_SECRET || '',
+
+  // Studio inquiry-notification transport when SMTP is configured (T074, FR-029).
+  ...(emailAdapter ? { email: emailAdapter } : {}),
 
   // In-region media storage (S3, ap-southeast-1) when configured (T077, FR-030).
   plugins: storagePlugins,

@@ -19,6 +19,10 @@ process.env.DATABASE_URI =
   process.env.TEST_DATABASE_URI || 'postgres://wrenfield:wrenfield@localhost:5432/wrenfield_test'
 process.env.PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || 'test-secret-wrenfield-integration'
 process.env.NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
+// A studio recipient so the inquiry-email path is exercised (the route's afterChange
+// hook now skips sending when no recipient is configured — src/lib/email.ts).
+process.env.INQUIRY_NOTIFY_TO = process.env.INQUIRY_NOTIFY_TO || 'studio@wrenfield.test'
+process.env.EMAIL_FROM = process.env.EMAIL_FROM || 'Wrenfield Works <no-reply@wrenfield.test>'
 
 let _payload: Promise<Payload> | null = null
 

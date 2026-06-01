@@ -13,7 +13,7 @@ import { describe, it, expect, beforeAll, afterEach, vi } from 'vitest'
 import type { Payload } from 'payload'
 
 import { getTestPayload } from './helpers'
-import { POST } from '@/app/api/inquiries/route'
+import { POST } from '@/app/api/inquiries/submit/route'
 
 const RUN = Date.now()
 
@@ -37,7 +37,7 @@ describe('T066 — email failure does not lose the stored inquiry', () => {
 
     const email = `isolated+${RUN}@example.com`
     const res = await POST(
-      new Request('http://localhost:3000/api/inquiries', {
+      new Request('http://localhost:3000/api/inquiries/submit', {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-forwarded-for': '10.66.0.1' },
         body: JSON.stringify({

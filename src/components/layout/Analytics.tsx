@@ -17,15 +17,18 @@ export function Analytics() {
 
   return (
     <>
+      {/* Define the window.plausible queue FIRST (ordered before the vendor script;
+          both afterInteractive) so a conversion fired on submit — always post-hydration —
+          is buffered and then drained by the vendor script once it loads. */}
+      <Script id="wf-analytics-init" strategy="afterInteractive">
+        {`window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}`}
+      </Script>
       <Script
         id="wf-analytics"
         src={cfg.scriptUrl}
         data-domain={cfg.domain}
         strategy="afterInteractive"
       />
-      <Script id="wf-analytics-init" strategy="afterInteractive">
-        {`window.plausible=window.plausible||function(){(window.plausible.q=window.plausible.q||[]).push(arguments)}`}
-      </Script>
     </>
   )
 }

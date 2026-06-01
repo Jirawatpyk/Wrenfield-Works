@@ -105,8 +105,18 @@ export async function sendInquiryNotification(
   send: EmailSender,
   opts: { to?: string; from?: string } = {},
 ): Promise<{ sent: boolean }> {
+  const message = buildInquiryNotification(inquiry, opts)
+
+  // Distinguish a misconfiguration (no recipient) from a transport outage: don't
+  // dispatch to an empty address, and emit a distinct signal so monitoring shows
+  // "unconfigured" rather than a generic "failed" (still never throws — FR-029).
+  if (!message.to) {
+    incr('inquiry.email.unconfigured')
+    log.warn('inquiry notification skipped: no recipient configured (set INQUIRY_NOTIFY_TO)')
+    return { sent: false }
+  }
+
   try {
-    const message = buildInquiryNotification(inquiry, opts)
     await send(message)
     incr('inquiry.email.sent')
     return { sent: true }

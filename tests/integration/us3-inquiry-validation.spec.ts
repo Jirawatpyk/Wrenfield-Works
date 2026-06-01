@@ -14,14 +14,14 @@
 import { describe, it, expect, beforeAll } from 'vitest'
 
 import { getTestPayload } from './helpers'
-import { POST } from '@/app/api/inquiries/route'
+import { POST } from '@/app/api/inquiries/submit/route'
 
 const RUN = Date.now()
 let ipSeq = 0
 
 function postFrom(ip: string, body: Record<string, unknown>): Promise<Response> {
   return POST(
-    new Request('http://localhost:3000/api/inquiries', {
+    new Request('http://localhost:3000/api/inquiries/submit', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-forwarded-for': ip },
       body: JSON.stringify(body),

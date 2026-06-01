@@ -12,6 +12,15 @@ import { parseInquiry, responseMessages } from '@/lib/validation/inquiry'
 /**
  * Public inquiry submission (T072, inquiry-api contract) — the ONLY public WRITE path.
  *
+ * Mounted at `/api/inquiries/submit` (a nested static segment), NOT `/api/inquiries`:
+ * `/api/inquiries` and `/api/inquiries/{id}` belong to Payload's REST catch-all
+ * (`(payload)/api/[...slug]`), which the admin uses for the inbox list and the
+ * delete-on-request flows. A route file directly at `/api/inquiries` would shadow
+ * that path for every verb and 405 the admin's bulk delete — so the public endpoint
+ * lives one segment deeper, leaving Payload's collection REST untouched. The
+ * collection's `create: denyAll` is the real gate; this route is the only ingress
+ * (it persists with `overrideAccess` after validation + spam checks).
+ *
  * Pipeline (deny-by-default, layered spam defense — FR-025):
  *   1. per-IP rate limit          → 429
  *   2. Zod validation             → 400 with localized field errors (FR-023)
@@ -21,22 +30,31 @@ import { parseInquiry, responseMessages } from '@/lib/validation/inquiry'
  *      then return 201 with a localized confirmation (FR-022).
  *
  * The studio email is fired by the collection's afterChange hook and is failure-
- * isolated, so a delivery problem never fails this request or loses the record
- * (FR-029). Lives at `/api/inquiries` (excluded from the locale proxy); it shadows
- * Payload's generic REST create for this slug on purpose — the collection's
- * `create: denyAll` plus this validated route are the only way in.
+ * isolated, so a delivery problem never fails this request or loses the record (FR-029).
  */
 export const runtime = 'nodejs'
 
 const log = childLogger('inquiry')
 
+/** Parse a non-negative integer env var, preserving an explicit 0 (e.g. "disable"). */
+function envInt(name: string, fallback: number, min = 0): number {
+  const n = Number(process.env[name])
+  return Number.isFinite(n) && n >= min ? n : fallback
+}
+
 // In-memory per-IP limiter (FR-025). Single in-region instance; low write volume.
 const limiter = createRateLimiter({
-  max: Number(process.env.INQUIRY_RATE_LIMIT_MAX) || 5,
-  windowMs: Number(process.env.INQUIRY_RATE_LIMIT_WINDOW_MS) || 3_600_000,
+  max: envInt('INQUIRY_RATE_LIMIT_MAX', 5, 0),
+  windowMs: envInt('INQUIRY_RATE_LIMIT_WINDOW_MS', 3_600_000, 1),
 })
 
-/** Best-effort client IP from the proxy headers; 'unknown' buckets together if absent. */
+/**
+ * Best-effort client IP from the proxy headers; 'unknown' buckets together if absent.
+ * NOTE: this takes the left-most X-Forwarded-For value, which a client can spoof if the
+ * app is exposed without a trusted reverse proxy that overwrites the header. The rate
+ * limit is one of three layers (honeypot + Turnstile remain); deployments behind an
+ * untrusted edge should pin this to the platform's verified client-IP header.
+ */
 function clientIp(request: Request): string {
   const fwd = request.headers.get('x-forwarded-for')
   if (fwd) return fwd.split(',')[0]?.trim() || 'unknown'

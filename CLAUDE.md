@@ -15,8 +15,9 @@ flow)** are built and passing tests. US2 adds: deny-by-default access + admin bo
 EN/TH publish-completeness gate (`src/lib/validation/publishCompleteness.ts`), optimistic-concurrency
 conflict detection (`src/lib/concurrency.ts`), per-type/URL validation (`src/lib/validation/url.ts`),
 draft preview (`src/app/api/preview/route.ts`, HMAC-signed), and on-publish revalidation
-(`src/lib/revalidate.ts`). US3 adds: the public inquiry write-path (`src/app/api/inquiries/route.ts`
-+ `src/collections/Inquiries.ts`, create-denied except via the validated route) with Zod validation
+(`src/lib/revalidate.ts`). US3 adds: the public inquiry write-path (`src/app/api/inquiries/submit/route.ts` —
+mounted one segment deep so it never shadows Payload's `/api/inquiries` collection REST used by the
+inbox + `src/collections/Inquiries.ts`, create-denied except via the validated route) with Zod validation
 (`src/lib/validation/inquiry.ts`), layered spam defense (`src/lib/rateLimit.ts` per-IP +
 `src/lib/turnstile.ts` fail-closed + honeypot), consent + a server-set 24-month `expiresAt`, a
 failure-isolated studio email (`src/lib/email.ts`), the back-office inbox, the daily retention job

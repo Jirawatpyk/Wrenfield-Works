@@ -38,11 +38,22 @@ export function createRateLimiter({ max, windowMs, now }: RateLimiterOptions): R
   const clock = now ?? (() => Date.now())
   // key -> ascending list of hit timestamps still inside the window.
   const hits = new Map<string, number[]>()
+  // Opportunistic eviction: keys whose hits all aged out are otherwise only pruned
+  // when that same key returns, so distinct keys (IPs) would accumulate forever.
+  const SWEEP_EVERY = 1000
+  let checks = 0
 
   return {
     check(key: string): RateLimitResult {
       const t = clock()
       const cutoff = t - windowMs
+
+      if (++checks % SWEEP_EVERY === 0) {
+        for (const [k, ts] of hits) {
+          if (ts.length === 0 || (ts[ts.length - 1] ?? 0) <= cutoff) hits.delete(k)
+        }
+      }
+
       const recent = (hits.get(key) ?? []).filter((ts) => ts > cutoff)
 
       if (recent.length >= max) {

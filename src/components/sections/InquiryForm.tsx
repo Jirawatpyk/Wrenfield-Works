@@ -1,14 +1,15 @@
 'use client'
 
 import Script from 'next/script'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { INQUIRY_SUBMITTED_EVENT, trackEvent } from '@/lib/analytics'
 import type { Locale } from '@/lib/i18n'
+import { MAX_NAME, MAX_MESSAGE } from '@/lib/validation/inquiry'
 
 /**
  * Inquiry form (T073, US3) — the on-site replacement for the design's `mailto:`
- * link. Posts to `/api/inquiries` (the only public write path) with the visitor's
+ * link. Posts to `/api/inquiries/submit` (the only public write path) with the visitor's
  * current locale, then shows an on-page confirmation (FR-022) and emits the
  * cookieless `inquiry_submitted` conversion (FR-011b).
  *
@@ -30,8 +31,9 @@ import type { Locale } from '@/lib/i18n'
 type FieldKey = 'name' | 'email' | 'message' | 'consent'
 type Status = 'idle' | 'sending' | 'success' | 'error'
 
-const MAX_NAME = 120
-const MAX_MESSAGE = 5000
+// Bounds are imported from the server schema (single source of truth — src/lib/validation/inquiry.ts)
+// so a client/server limit drift is impossible. EMAIL_RE is a lightweight client-only pre-check;
+// the authoritative email validation is the server's z.email().
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const COPY: Record<
@@ -45,6 +47,7 @@ const COPY: Record<
     privacy: string
     submit: string
     sending: string
+    success: string
     summary: string
     generic: string
     fields: Record<FieldKey, string>
@@ -60,6 +63,7 @@ const COPY: Record<
     privacy: 'Privacy notice',
     submit: 'Send message',
     sending: 'Sending…',
+    success: "Thanks — your message has been sent. We'll be in touch shortly.",
     summary: 'Please fix the highlighted fields and try again.',
     generic: 'Your message could not be sent. Please try again.',
     fields: {
@@ -78,6 +82,7 @@ const COPY: Record<
     privacy: 'นโยบายความเป็นส่วนตัว',
     submit: 'ส่งข้อความ',
     sending: 'กำลังส่ง…',
+    success: 'ขอบคุณ — ส่งข้อความของคุณแล้ว เราจะติดต่อกลับโดยเร็ว',
     summary: 'กรุณาแก้ไขช่องที่ระบุแล้วลองใหม่อีกครั้ง',
     generic: 'ไม่สามารถส่งข้อความได้ กรุณาลองใหม่อีกครั้ง',
     fields: {
@@ -91,7 +96,6 @@ const COPY: Record<
 
 export function InquiryForm({ locale }: { locale: Locale }) {
   const copy = COPY[locale]
-  const formRef = useRef<HTMLFormElement>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [summary, setSummary] = useState('')
@@ -145,7 +149,7 @@ export function InquiryForm({ locale }: { locale: Locale }) {
     setStatus('sending')
 
     try {
-      const res = await fetch('/api/inquiries', {
+      const res = await fetch('/api/inquiries/submit', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
@@ -167,9 +171,13 @@ export function InquiryForm({ locale }: { locale: Locale }) {
 
       if (res.status === 201) {
         setStatus('success')
-        setSuccessMsg(json.message || copy.submit)
+        // Fall back to a localized CONFIRMATION (never the button label) if the body lacks one.
+        setSuccessMsg(json.message || copy.success)
         trackEvent(INQUIRY_SUBMITTED_EVENT, { locale })
         form.reset()
+        // form.reset() clears the single-use Turnstile token; regenerate one so a
+        // second submission in the same session isn't rejected as a failed challenge.
+        ;(globalThis as { turnstile?: { reset?: () => void } }).turnstile?.reset?.()
         return
       }
       if (res.status === 400 && json.errors) {
@@ -190,7 +198,6 @@ export function InquiryForm({ locale }: { locale: Locale }) {
 
   return (
     <form
-      ref={formRef}
       className="inquiry-form"
       data-testid="inquiry-form"
       aria-label={copy.formLabel}

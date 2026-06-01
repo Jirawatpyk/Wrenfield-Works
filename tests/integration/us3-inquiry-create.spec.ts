@@ -15,7 +15,7 @@ import { describe, it, expect, beforeAll } from 'vitest'
 import type { Payload } from 'payload'
 
 import { getTestPayload } from './helpers'
-import { POST } from '@/app/api/inquiries/route'
+import { POST } from '@/app/api/inquiries/submit/route'
 import { RESPONSE_MESSAGES } from '@/lib/validation/inquiry'
 
 const RUN = Date.now()
@@ -24,7 +24,7 @@ let ipSeq = 0
 function postInquiry(body: Record<string, unknown>): Promise<Response> {
   ipSeq += 1
   return POST(
-    new Request('http://localhost:3000/api/inquiries', {
+    new Request('http://localhost:3000/api/inquiries/submit', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',

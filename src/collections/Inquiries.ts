@@ -33,7 +33,9 @@ const notifyStudioOnCreate: CollectionAfterChangeHook = ({ doc, operation, req }
   // which would falsely increment inquiry.email.sent. Mark it unconfigured and skip so
   // monitoring reflects reality (the stored inquiry is unaffected — FR-029).
   if (!process.env.SMTP_HOST) {
-    incr('inquiry.email.unconfigured')
+    // Distinct from email.ts's `inquiry.email.unconfigured` (which means "no recipient"),
+    // so monitoring can tell a missing transport apart from a missing INQUIRY_NOTIFY_TO.
+    incr('inquiry.email.no_transport')
     emailLog.warn('inquiry notification skipped: no SMTP transport configured (set SMTP_HOST)')
     return doc
   }

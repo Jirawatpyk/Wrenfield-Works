@@ -12,6 +12,7 @@ import type { CollectionConfig, Field, GlobalConfig } from 'payload'
 import sharp from 'sharp'
 
 import { conflictDetectionHook } from './lib/concurrency'
+import { envInt } from './lib/env'
 import { assertPreviewSecret, buildPreviewPath } from './lib/preview'
 import {
   revalidateAfterChange,
@@ -54,7 +55,10 @@ function emailFromAddress(): string {
   const raw = (process.env.EMAIL_FROM || '').trim()
   const angle = /<([^>]+)>/.exec(raw)
   if (angle?.[1]) return angle[1].trim()
-  return raw.includes('@') ? raw : ''
+  // Accept ONLY a clean bare address (one token, single @, no spaces/commas/brackets);
+  // an unclosed-angle (`Name <a@x`) or comma-list value falls back rather than becoming
+  // an invalid From header.
+  return /^[^\s,<>]+@[^\s,<>]+$/.test(raw) ? raw : ''
 }
 
 /**
@@ -63,7 +67,7 @@ function emailFromAddress(): string {
  * is visible (no real delivery) rather than silently pretending to send. The inquiry
  * `from`/`to` are set per-message in src/lib/email.ts; these are just defaults.
  */
-const SMTP_PORT = Number(process.env.SMTP_PORT) || 587
+const SMTP_PORT = envInt('SMTP_PORT', 587, 1)
 const emailAdapter = process.env.SMTP_HOST
   ? nodemailerAdapter({
       defaultFromName: 'Wrenfield Works',

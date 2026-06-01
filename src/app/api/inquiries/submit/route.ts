@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
 
 import config from '@payload-config'
+import { envInt } from '@/lib/env'
 import { normalizeLocale } from '@/lib/i18n'
 import { childLogger } from '@/lib/logging'
 import { incr, trace } from '@/lib/observability'
@@ -35,18 +36,6 @@ import { parseInquiry, responseMessages } from '@/lib/validation/inquiry'
 export const runtime = 'nodejs'
 
 const log = childLogger('inquiry')
-
-/**
- * Parse a non-negative integer env var. An unset OR empty/whitespace value falls back
- * to the default (Number('') would otherwise coerce to 0); a malformed value also falls
- * back. An explicit numeric value (incl. 0) is honored.
- */
-function envInt(name: string, fallback: number, min = 0): number {
-  const raw = process.env[name]
-  if (raw == null || raw.trim() === '') return fallback
-  const n = Number(raw)
-  return Number.isFinite(n) && n >= min ? n : fallback
-}
 
 // In-memory per-IP limiter (FR-025). Single in-region instance; low write volume.
 // INQUIRY_RATE_LIMIT_MAX=0 DISABLES the limit (the check below is skipped); an unset or

@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import { envInt } from './env'
 import { childLogger } from './logging'
 import { incr, trace } from './observability'
 
@@ -25,10 +26,13 @@ const log = childLogger('retention')
 /** Default retention horizon in months (env-overridable via INQUIRY_RETENTION_MONTHS). */
 export const RETENTION_MONTHS = 24
 
-/** Read the configured retention window, falling back to 24 months. */
+/**
+ * Read the configured retention window (≥ 1 month), falling back to 24. Uses the shared
+ * `envInt` (min: 1) so e.g. INQUIRY_RETENTION_MONTHS='0.5' falls back to 24 rather than
+ * flooring to a 0-month window (immediate deletion).
+ */
 export function retentionMonths(): number {
-  const raw = Number(process.env.INQUIRY_RETENTION_MONTHS)
-  return Number.isFinite(raw) && raw > 0 ? Math.floor(raw) : RETENTION_MONTHS
+  return envInt('INQUIRY_RETENTION_MONTHS', RETENTION_MONTHS, 1)
 }
 
 /**

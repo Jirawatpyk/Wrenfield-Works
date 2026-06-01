@@ -19,12 +19,10 @@ process.env.DATABASE_URI =
   process.env.TEST_DATABASE_URI || 'postgres://wrenfield:wrenfield@localhost:5432/wrenfield_test'
 process.env.PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || 'test-secret-wrenfield-integration'
 process.env.NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
-// Configure the inquiry-email path so the afterChange hook actually attempts a send
-// (the hook skips when SMTP_HOST is unset, and email.ts skips when no recipient). A
-// loopback host fast-refuses real sends (T064/T065 tolerate {sent:false}); T066 stubs
-// payload.sendEmail to assert failure isolation. The adapter uses skipVerify, so booting
-// Payload here does not open a live SMTP handshake.
-process.env.SMTP_HOST = process.env.SMTP_HOST || '127.0.0.1'
+// Configure the inquiry-email path so the afterChange hook proceeds (it skips when
+// SMTP_HOST is unset; email.ts skips when no recipient). `getTestPayload` stubs
+// `payload.sendEmail` below, so tests never open a real SMTP socket regardless of host.
+process.env.SMTP_HOST = process.env.SMTP_HOST || 'smtp.test.invalid'
 process.env.INQUIRY_NOTIFY_TO = process.env.INQUIRY_NOTIFY_TO || 'studio@wrenfield.test'
 process.env.EMAIL_FROM = process.env.EMAIL_FROM || 'Wrenfield Works <no-reply@wrenfield.test>'
 
@@ -36,7 +34,14 @@ export function getTestPayload(): Promise<Payload> {
     _payload = (async () => {
       const { getPayload } = await import('payload')
       const config = (await import('@payload-config')).default
-      return getPayload({ config })
+      const payload = await getPayload({ config })
+      // Stub the email transport so integration tests are network-free + deterministic:
+      // the Inquiries afterChange hook calls sendEmail on every create, and a real
+      // nodemailer connect (even a refused one) is an env-dependent side effect. The
+      // email-isolation spec (T066) overrides this with its own rejecting spy to exercise
+      // failure isolation (FR-029).
+      payload.sendEmail = (async () => ({ messageId: 'test-stub' })) as Payload['sendEmail']
+      return payload
     })()
   }
   return _payload

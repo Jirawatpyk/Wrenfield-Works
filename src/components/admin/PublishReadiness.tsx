@@ -79,8 +79,10 @@ const StateBadge: React.FC<{ state: Row['state']; i18n: I18nClient }> = ({ state
     error: { cls: 'wf-badge--neutral', copy: adminCopy.readinessError, glyph: '!' },
   }[state]
   const text = getTranslation(map.copy, i18n)
+  // No aria-label: the visible `text` already names the state and the glyph is
+  // aria-hidden, so status is conveyed by text (not color/glyph alone).
   return (
-    <span className={`wf-badge ${map.cls}`} aria-label={text}>
+    <span className={`wf-badge ${map.cls}`}>
       <span aria-hidden>{map.glyph}</span> {text}
     </span>
   )
@@ -106,9 +108,10 @@ const PublishReadiness: React.FC<{ payload: Payload; i18n: I18nClient }> = async
       <table className="wf-readiness">
         <thead>
           <tr>
-            <th>&nbsp;</th>
-            <th>Status</th>
-            <th>Published</th>
+            {/* `Status` / `Published` are intentionally English (FR-011 status labels). */}
+            <th scope="col">{getTranslation(adminCopy.readinessColContent, i18n)}</th>
+            <th scope="col">Status</th>
+            <th scope="col">Published</th>
           </tr>
         </thead>
         <tbody>

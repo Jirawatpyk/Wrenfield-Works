@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
-import { loginAsAdmin } from './admin-helpers'
+import { loginAsAdmin, gotoGlobal } from './admin-helpers'
 
 /**
  * Admin editorial theme a11y (D, FR-007): our branding/theme/components introduce
@@ -72,6 +72,19 @@ for (const theme of ['dark', 'light'] as const) {
     await loginAsAdmin(page)
     await setTheme(page, theme)
     await expect(page.getByTestId('wf-welcome-card')).toBeVisible()
+    const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
+    expectNoNovelViolations(results.violations as Violation[])
+  })
+
+  // The edit view is where LocaleStatusField (the per-document banner) renders —
+  // the newest component in this feature. Gate it directly in both themes.
+  test(`edit view with locale-status banner introduces no new AA violations in ${theme} theme`, async ({
+    page,
+  }) => {
+    await loginAsAdmin(page)
+    await gotoGlobal(page, 'seo-metadata')
+    await setTheme(page, theme)
+    await expect(page.getByTestId('wf-locale-status')).toBeVisible({ timeout: 30_000 })
     const results = await new AxeBuilder({ page }).withTags(WCAG_AA).analyze()
     expectNoNovelViolations(results.violations as Violation[])
   })

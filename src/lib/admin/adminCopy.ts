@@ -28,6 +28,8 @@ export const adminCopy = {
     en: 'Publish readiness',
     th: 'ความพร้อมในการเผยแพร่',
   },
+  // Accessible header for the readiness table's first (content-type) column.
+  readinessColContent: { en: 'Content', th: 'เนื้อหา' },
   readinessProgress: {
     en: '{n} of {total} ready to publish',
     th: 'พร้อมเผยแพร่ {n} จาก {total} รายการ',
@@ -50,8 +52,8 @@ export const adminCopy = {
     th: 'มีการแก้ไขที่ยังไม่บันทึก สถานะนี้ยังไม่รวมการแก้ไขล่าสุด',
   },
   recheckLabel: {
-    en: 'Save draft to re-check',
-    th: 'บันทึกฉบับร่างเพื่อตรวจสอบใหม่',
+    en: 'Save draft to re-check.',
+    th: 'กดบันทึกฉบับร่างเพื่อตรวจสอบใหม่',
   },
   missingEnLabel: {
     en: 'English still needed:',

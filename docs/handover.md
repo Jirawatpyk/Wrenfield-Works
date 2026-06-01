@@ -107,9 +107,10 @@ in the template is listed below.
 | `ADMIN_EMAIL` | Email of the first staff user, created by `pnpm seed`. | **Required for bootstrap** | No first admin can be seeded. |
 | `ADMIN_PASSWORD` | Password of the first staff user. | **Required for bootstrap** | **Seed refuses the default password in production** — you must set a strong one. See §3. |
 | `INQUIRY_RETENTION_MONTHS` | Retention window in months (PDPA default `24`, FR-027). | Optional | Defaults to 24. Do not lengthen without a documented legal basis. |
+| `CRON_SECRET` | Bearer token gating the Vercel Cron retention endpoint (`/api/cron/retention`, §4). | **Required (prod)** | Without it the deletion endpoint is permanently 401 and the daily Vercel Cron cannot run → inquiries are never purged. Strong random value (`openssl rand -base64 32`). |
 
-**Strong-secret checklist before any prod deploy:** `PAYLOAD_SECRET`, `PREVIEW_SECRET`, and
-`ADMIN_PASSWORD` must all be changed away from the `change-me-*` template values. Both Turnstile
+**Strong-secret checklist before any prod deploy:** `PAYLOAD_SECRET`, `PREVIEW_SECRET`,
+`CRON_SECRET`, and `ADMIN_PASSWORD` must all be changed away from the `change-me-*` template values. Both Turnstile
 keys must be set. `NEXT_PUBLIC_SERVER_URL` must be the real HTTPS origin.
 
 ---
@@ -160,18 +161,28 @@ authenticated staff can read/write content. Do not loosen this.
 `INQUIRY_RETENTION_MONTHS` (default 24). This is a hard PDPA requirement: the *whole* inquiry record
 goes, not just selected fields.
 
-**Entry point.** `src/jobs/retention.ts`, run via:
-```bash
-pnpm retention      # → payload run src/jobs/retention.ts → runRetention() in src/lib/retention.ts
-```
+**Two entry points (same `runRetention()` logic in `src/lib/retention.ts`):**
+1. **Vercel Cron** (default for this deployment) → `GET /api/cron/retention`
+   (`src/app/api/cron/retention/route.ts`).
+2. **CLI** (host scheduler / manual) → `pnpm retention` (`payload run src/jobs/retention.ts`).
 
-**Schedule.** Run it **daily** via the **in-region** cron scheduler (same region as the DB). Example
-crontab (run at 02:15 Singapore time):
+**Schedule — Vercel Cron.** Already wired in `vercel.json`:
+```json
+{ "crons": [{ "path": "/api/cron/retention", "schedule": "0 18 * * *" }] }
+```
+`0 18 * * *` is **18:00 UTC = 02:00 Asia/Singapore**, daily (Vercel cron expressions are UTC).
+**Required:** set the **`CRON_SECRET`** env var in the Vercel project. Vercel automatically sends it
+as `Authorization: Bearer <CRON_SECRET>` on each invocation; the endpoint **fails closed** (401) if
+the header is missing/wrong or `CRON_SECRET` is unset, so the public can never trigger the deletion.
+Crons run **only on production deployments**. A failed/partial run returns **HTTP 500** (Vercel marks
+the invocation failed). The endpoint also needs the app's usual env (`DATABASE_URI`, `PAYLOAD_SECRET`,
+`PREVIEW_SECRET`, `INQUIRY_RETENTION_MONTHS`).
+
+**Alternative — host cron** (non-Vercel / VPC-only DB). Run the CLI daily, in-region (`ap-southeast-1`),
+with the same `.env`:
 ```
 15 2 * * *   cd /srv/wrenfield && pnpm retention >> /var/log/wrenfield/retention.log 2>&1
 ```
-Adjust the path/working dir to your deployment. Ensure the scheduler runs in `ap-southeast-1` and
-has the same `.env` (it needs `DATABASE_URI` and `INQUIRY_RETENTION_MONTHS`).
 
 **Self-healing / idempotency.** The deletion query is purely time-based (everything older than the
 cutoff), so it is idempotent and **self-catches-up**: if a run is missed or fails, the next run
